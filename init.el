@@ -5,24 +5,23 @@
 
 ;;; Code:
 
-(defun my/byte-compile-buffer-file ()
-  (byte-compile-file buffer-file-name))
+; I guess this is useful for pre-27 Emacs, but it's mostly so that flycheck stops
+; yelling at me.
+(require 'early-init (expand-file-name "early-init.el" user-emacs-directory))
 
 (defun my/tangle-init ()
-  "If the current buffer is 'README.org' in the user dir, the
-       code blocks are tangled, and the tangled file is compiled."
+  "Tangle the buffer if it's README.org in the user dir."
   (when (equal (buffer-file-name)
-               (expand-file-name (concat user-emacs-directory "README.org")))
+               (expand-file-name "README.org" user-emacs-directory))
     ;; Avoid running hooks when tangling
     (let ((prog-mode-hook nil)
           (org-confirm-babel-evaluate nil))
-      (add-hook 'org-babel-post-tangle-hook #'my/byte-compile-buffer-file)
       (org-babel-tangle)
-      (remove-hook 'org-babel-post-tangle-hook #'my/byte-compile-buffer-file))))
+      (byte-compile-file (expand-file-name "init.el" user-emacs-directory)))))
 
 (add-hook 'after-save-hook 'my/tangle-init)
 
-(setq custom-file (concat user-emacs-directory "custom.el"))
+(setq custom-file (no-littering-expand-etc-file-name "custom.el"))
 (add-hook 'after-init-hook #'(lambda ()
                                (message "loading %s" custom-file)
                                (load custom-file t)))
@@ -32,11 +31,7 @@
   :config
   (exec-path-from-shell-initialize))
 
-(setq my/backup-directory (concat user-emacs-directory "backups"))
-(when (not (file-exists-p my/backup-directory))
-  (make-directory my/backup-directory))
-(setq backup-directory-alist `(("." . ,my/backup-directory))
-      backup-by-copying t    ; don't clobber symlinks
+(setq backup-by-copying t    ; don't clobber symlinks
       version-control t      ; numbered backups
       delete-old-versions t  ; manage excess backups
       kept-old-versions 6
@@ -54,7 +49,6 @@
 
 (use-package savehist
   :custom
-  (savehist-file (concat user-emacs-directory "savehist"))
   (savehist-save-minibuffer-history t)
   (history-length 10000)  ; set to t for infinite history
   (history-delete-duplicates t)
@@ -107,11 +101,8 @@
 
 (setq-default show-trailing-whitespace t)
 
-(defun my/hide-trailing-whitespace ()
-  (setq show-trailing-whitespace nil))
-
-(add-hook 'minibuffer-setup-hook
-          'my/hide-trailing-whitespace)
+(add-hook 'minibuffer-setup-hook #'(lambda ()
+                                     (setq show-trailing-whitespace nil)))
 
 (setq-default fill-column 88)
 (setq-default auto-fill-function 'do-auto-fill)
@@ -140,23 +131,27 @@
       ediff-split-window-function 'split-window-horizontally)
 
 (defvar my/toggle-face-height-hook nil
-  "Called when toggling the face height for mixed-DPI setups")
+  "Called when toggling the face height for mixed-DPI setups.")
 
 (defun my/current-default-face-height ()
+  "Get the height of the default face in the current frame."
   (face-attribute 'default :height (selected-frame)))
 
 (defun my/toggle-face-height ()
+  "Toggle the height of the default face in the current frame.
+Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (interactive)
 
   (set-face-attribute 'default (selected-frame) :height
                       (if (> (my/current-default-face-height) 80) 60 100))
   (run-hooks 'my/toggle-face-height-hook))
 
-(global-set-key (kbd "C-x T s") 'my/toggle-face-height)
+(global-set-key (kbd "C-x t s") 'my/toggle-face-height)
 
 (use-package dash :config (dash-enable-font-lock))
 
 (defun my/enable-compositions (ligatures)
+  "Set up the `composition-function-table' for a list of LIGATURES."
   (-each (-group-by 'string-to-char ligatures)
     (-lambda ((char . comps))
       (set-char-table-range composition-function-table char
@@ -179,6 +174,7 @@
 (global-prettify-symbols-mode -1)
 
 (defun my/toggle-theme ()
+  "Toggle between dark and light themes."
   (interactive)
 
   (let ((is-dark (seq-contains-p custom-enabled-themes my/dark-theme)))
@@ -209,6 +205,9 @@
   (auto-fill-function " $")
   (visual-line-mode))
 
+(use-package prescient
+  :config (prescient-persist-mode +1))
+
 (use-package hydra)
 
 (use-package which-key
@@ -219,6 +218,9 @@
   :demand t
   :delight company-mode
   :hook (after-init . global-company-mode))
+
+(use-package company-prescient
+  :config (company-prescient-mode +1))
 
 (use-package smartparens
   :delight (smartparens-mode " ()")
@@ -244,6 +246,10 @@
   :after ivy
   :delight counsel-mode
   :config (counsel-mode +1))
+
+(use-package ivy-prescient
+  :after counsel
+  :config (ivy-prescient-mode +1))
 
 (use-package ivy-rich
   :after (ivy counsel all-the-icons-ivy-rich)
@@ -614,18 +620,37 @@
 
 (setq-default explicit-shell-file-name "/bin/bash")
 
-(defun my/load-local-init ()
-  (interactive)
-  (let* ((system-type-fs (subst-char-in-string ?/ ?- (symbol-name system-type)))
-         (local-init (format "local-%s-%s" (system-name) system-type-fs))
-         (local-init-path (expand-file-name local-init user-emacs-directory)))
-    (condition-case nil
-        (progn
-          (load local-init-path)
-          (message "%s init complete" (system-name)))
-      (error (message "No local into file \"%s\"" local-init-path)))))
+(defconst *my/local-id*
+  (format "%s.%s" (downcase (system-name)) system-type)
+  "Hostname-based identifier for the current installation.")
 
-(add-hook 'after-init-hook 'my/load-local-init)
+(defvar my/local-config-count 0
+  "The number of local configs that have been loaded.")
 
+(defmacro my/config-for-local-id (id &rest body)
+  "Run BODY only on the installation identified by ID."
+  (declare (indent defun))
+  `(when (string= ,id *my/local-id*)
+     (setq my/local-config-count (1+ my/local-config-count))
+     ,@body))
+
+(my/config-for-local-id "ancalagon.gnu/linux"
+  (setq projectile-project-search-path '("~/src"))
+  (setq treemacs-python-executable (executable-find "python3")))
+
+(my/config-for-local-id "galatine.windows-nt"
+  (setq projectile-project-search-path '("~/Source"))
+  (setq treemacs-python-executable (executable-find "python"))
+  (setq flycheck-python-pycompile-executable (executable-find "python"))
+  (setq ispell-program-name (expand-file-name "~/bin/hunspell-current/bin/hunspell.exe")))
+
+(my/config-for-local-id "milliways.gnu/linux"
+  (setq projectile-project-search-path '("~/src"))
+  (setq treemacs-python-executable (executable-find "python3")))
+
+(message "Loaded %d sections matching local id \"%s\""
+         my/local-config-count *my/local-id*)
 (message "main init complete")
+
+(provide 'init)
 ;;; init.el ends here

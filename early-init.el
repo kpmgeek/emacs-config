@@ -33,19 +33,21 @@
 (defconst *my/is-winnt*
   (or (string= "windows-nt" system-type)
       (string= "cygwin" system-type))
-  "True if Emacs is running under Windows")
+  "Non-nil if Emacs is running under Windows.")
 
 (defconst *my/is-gnu-like*
   (or *my/is-winnt*  ; usually means GoW/Cygwin/MSYS2
       (string-prefix-p "gnu" (symbol-name system-type)))
-  "True if we expect GNU-like coreutils")
+  "Non-nil if we expect GNU-like coreutils.")
 
 (defconst *my/is-macos*
   (memq window-system '(mac ns))
-  "True if Emacs is running under macOS")
+  "Non-nil if Emacs is running under macOS.")
+
+(use-package no-littering)
 
 (setq inhibit-startup-message t)
-(setq initial-scratch-message "hello, world!")
+(setq initial-scratch-message nil)
 
 (unless *my/is-macos*
   (menu-bar-mode -1))
@@ -74,4 +76,6 @@
   (load-theme my/initial-theme t))
 
 (message "early bird init complete")
+
+(provide 'early-init)
 ;;; early-init.el ends here

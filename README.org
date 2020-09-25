@@ -18,6 +18,10 @@
     ;; THIS IS A GENERATED FILE; changes should be made to README.org
 
     ;;; Code:
+
+    ; I guess this is useful for pre-27 Emacs, but it's mostly so that flycheck stops
+    ; yelling at me.
+    (require 'early-init (expand-file-name "early-init.el" user-emacs-directory))
   #+END_SRC
 
   I use lexical binding (I believe now the default in Emacs 27.1) and a lot of
@@ -36,7 +40,7 @@
     (setq load-prefer-newer t)
   #+END_SRC
 
-[fn:packages] Specifically: =straight.el=, =use-package=, =auto-compile=, and on macOS,
+[fn:packages] Specifically: =straight.el=, =use-package=, =auto-compile=, =no-littering= and on macOS,
 =exec-path-from-shell=.
 
 [fn:better-defaults] I originally used better-defaults directly, but got fed up with
@@ -54,20 +58,15 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    work, it can be trigged manually with =org-babel-tangle= (=C-c C-v t=).
 
    #+BEGIN_SRC emacs-lisp
-     (defun my/byte-compile-buffer-file ()
-       (byte-compile-file buffer-file-name))
-
      (defun my/tangle-init ()
-       "If the current buffer is 'README.org' in the user dir, the
-            code blocks are tangled, and the tangled file is compiled."
+       "Tangle the buffer if it's README.org in the user dir."
        (when (equal (buffer-file-name)
-                    (expand-file-name (concat user-emacs-directory "README.org")))
+                    (expand-file-name "README.org" user-emacs-directory))
          ;; Avoid running hooks when tangling
          (let ((prog-mode-hook nil)
                (org-confirm-babel-evaluate nil))
-           (add-hook 'org-babel-post-tangle-hook #'my/byte-compile-buffer-file)
            (org-babel-tangle)
-           (remove-hook 'org-babel-post-tangle-hook #'my/byte-compile-buffer-file))))
+           (byte-compile-file (expand-file-name "init.el" user-emacs-directory)))))
 
      (add-hook 'after-save-hook 'my/tangle-init)
    #+END_SRC
@@ -79,7 +78,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    started, and it's good for them to be able to use the customization interface.
 
    #+BEGIN_SRC emacs-lisp
-     (setq custom-file (concat user-emacs-directory "custom.el"))
+     (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
      (add-hook 'after-init-hook #'(lambda ()
                                     (message "loading %s" custom-file)
                                     (load custom-file t)))
@@ -159,12 +158,12 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
       (defconst *my/is-winnt*
         (or (string= "windows-nt" system-type)
             (string= "cygwin" system-type))
-        "True if Emacs is running under Windows")
+        "Non-nil if Emacs is running under Windows.")
 
       (defconst *my/is-gnu-like*
         (or *my/is-winnt*  ; usually means GoW/Cygwin/MSYS2
             (string-prefix-p "gnu" (symbol-name system-type)))
-        "True if we expect GNU-like coreutils")
+        "Non-nil if we expect GNU-like coreutils.")
     #+END_SRC
 
 *** macOS
@@ -175,7 +174,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
     #+BEGIN_SRC emacs-lisp :tangle early-init.el
       (defconst *my/is-macos*
         (memq window-system '(mac ns))
-        "True if Emacs is running under macOS")
+        "Non-nil if Emacs is running under macOS.")
     #+END_SRC
 
     If you configure environment variables in your shell's config file, GUI applications
@@ -189,19 +188,25 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
         (exec-path-from-shell-initialize))
     #+END_SRC
 
+** No Littering
+
+   Emacs and its packages tend to scatter files around madly. The [[https://github.com/emacscollective/no-littering][no-littering]] package
+   helps tidy that up, and replaces a number of paths that I previously configured
+   manually.
+
+   #+BEGIN_SRC emacs-lisp :tangle early-init.el
+     (use-package no-littering)
+   #+END_SRC
+
 ** Safety & Backups
 
    By default, Emacs keeps the previous version of each file around in a backup file,
    which is placed alongside the backed-up file. This makes them easy to find, but
    causes a lot of clutter. A better option is to store them all in one directory; this
-   also makes it practical to keep multiple versions.
+   also makes it practical to keep multiple versions. (See [[No Littering]])
 
    #+BEGIN_SRC emacs-lisp
-     (setq my/backup-directory (concat user-emacs-directory "backups"))
-     (when (not (file-exists-p my/backup-directory))
-       (make-directory my/backup-directory))
-     (setq backup-directory-alist `(("." . ,my/backup-directory))
-           backup-by-copying t    ; don't clobber symlinks
+     (setq backup-by-copying t    ; don't clobber symlinks
            version-control t      ; numbered backups
            delete-old-versions t  ; manage excess backups
            kept-old-versions 6
@@ -231,7 +236,6 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    #+BEGIN_SRC emacs-lisp
      (use-package savehist
        :custom
-       (savehist-file (concat user-emacs-directory "savehist"))
        (savehist-save-minibuffer-history t)
        (history-length 10000)  ; set to t for infinite history
        (history-delete-duplicates t)
@@ -313,7 +317,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp :tangle early-init.el
      (setq inhibit-startup-message t)
-     (setq initial-scratch-message "hello, world!")
+     (setq initial-scratch-message nil)
    #+END_SRC
 
    The menu bar can be useful for rarely-used commands to which one doesn't remember the
@@ -413,11 +417,8 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    #+BEGIN_SRC emacs-lisp
      (setq-default show-trailing-whitespace t)
 
-     (defun my/hide-trailing-whitespace ()
-       (setq show-trailing-whitespace nil))
-
-     (add-hook 'minibuffer-setup-hook
-               'my/hide-trailing-whitespace)
+     (add-hook 'minibuffer-setup-hook #'(lambda ()
+                                          (setq show-trailing-whitespace nil)))
    #+END_SRC
 
    Long lines are also a bit of a liability. Many people standardise on 80, but I
@@ -516,19 +517,22 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp
      (defvar my/toggle-face-height-hook nil
-       "Called when toggling the face height for mixed-DPI setups")
+       "Called when toggling the face height for mixed-DPI setups.")
 
      (defun my/current-default-face-height ()
+       "Get the height of the default face in the current frame."
        (face-attribute 'default :height (selected-frame)))
 
      (defun my/toggle-face-height ()
+       "Toggle the height of the default face in the current frame.
+     Useful when moving Emacs frames between monitors in mixed-DPI setups."
        (interactive)
 
        (set-face-attribute 'default (selected-frame) :height
                            (if (> (my/current-default-face-height) 80) 60 100))
        (run-hooks 'my/toggle-face-height-hook))
 
-     (global-set-key (kbd "C-x T s") 'my/toggle-face-height)
+     (global-set-key (kbd "C-x t s") 'my/toggle-face-height)
    #+END_SRC
 
 * Visual Flair
@@ -576,6 +580,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp
      (defun my/enable-compositions (ligatures)
+       "Set up the `composition-function-table' for a list of LIGATURES."
        (-each (-group-by 'string-to-char ligatures)
          (-lambda ((char . comps))
            (set-char-table-range composition-function-table char
@@ -632,6 +637,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp
      (defun my/toggle-theme ()
+       "Toggle between dark and light themes."
        (interactive)
 
        (let ((is-dark (seq-contains-p custom-enabled-themes my/dark-theme)))
@@ -697,6 +703,16 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
   The packages in this section either show up in many Emacs configs, or are part of a
   class of packages one of which shows up in many Emacs configs.
 
+** Libraries
+
+   [[https://github.com/raxod502/prescient.el][prescient.el]] is used to order searches by frecency. Make changes to its options here;
+   integration with other packages is located with those packages.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package prescient
+       :config (prescient-persist-mode +1))
+   #+END_SRC
+
 ** Keybindings
 
    The [[https://github.com/abo-abo/hydra][Hydra]] library provides tools for constructing groups of keybindings that require
@@ -727,6 +743,9 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        :demand t
        :delight company-mode
        :hook (after-init . global-company-mode))
+
+     (use-package company-prescient
+       :config (company-prescient-mode +1))
    #+END_SRC
 
    Less dramatically, [[https://github.com/Fuco1/smartparens][Smartparens]] helps insert paired characters for you. This config
@@ -777,6 +796,14 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        :after ivy
        :delight counsel-mode
        :config (counsel-mode +1))
+   #+END_SRC
+
+   =prescient.el= integrates with Ivy, and sort of de-integrates with Counsel.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package ivy-prescient
+       :after counsel
+       :config (ivy-prescient-mode +1))
    #+END_SRC
 
    In order to display more information in Ivy minibuffers, [[https://github.com/Yevgnen/ivy-rich][ivy-rich]] adds the concept of
@@ -1406,22 +1433,23 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 * Machine-Specific Settings
 
-  Machine-specific settings are loaded from separate files, distinguished by the
-  machine's hostname, so that they can be checked in side-by-side.
+  Machine-specific settings are loaded by keying off of an string constructed from the
+  hostname and system type.
 
   #+BEGIN_SRC emacs-lisp
-    (defun my/load-local-init ()
-      (interactive)
-      (let* ((system-type-fs (subst-char-in-string ?/ ?- (symbol-name system-type)))
-             (local-init (format "local-%s-%s" (system-name) system-type-fs))
-             (local-init-path (expand-file-name local-init user-emacs-directory)))
-        (condition-case nil
-            (progn
-              (load local-init-path)
-              (message "%s init complete" (system-name)))
-          (error (message "No local into file \"%s\"" local-init-path)))))
+    (defconst *my/local-id*
+      (format "%s.%s" (downcase (system-name)) system-type)
+      "Hostname-based identifier for the current installation.")
 
-    (add-hook 'after-init-hook 'my/load-local-init)
+    (defvar my/local-config-count 0
+      "The number of local configs that have been loaded.")
+
+    (defmacro my/config-for-local-id (id &rest body)
+      "Run BODY only on the installation identified by ID."
+      (declare (indent defun))
+      `(when (string= ,id *my/local-id*)
+         (setq my/local-config-count (1+ my/local-config-count))
+         ,@body))
   #+END_SRC
 
   Note that the machine-specific settings are loaded as the last thing, after the rest
@@ -1430,62 +1458,44 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 ** Ancalagon
 
-   #+BEGIN_SRC emacs-lisp :tangle local-ancalagon-gnu-linux.el
-     ;;; local-ancalagon-gnu-linux.el --- local init for ancalagon (GNU/Linux)
-
-     ;;; Commentary:
-     ;; THIS IS A GENERATED FILE; changes should be made to README.org
-
-     ;;; Code:
-
-     (setq projectile-project-search-path '("~/src"))
-     (setq treemacs-python-executable (executable-find "python3"))
-
-     ;;; local-ancalagon-gnu-linux.el ends here
+   #+BEGIN_SRC emacs-lisp
+     (my/config-for-local-id "ancalagon.gnu/linux"
+       (setq projectile-project-search-path '("~/src"))
+       (setq treemacs-python-executable (executable-find "python3")))
    #+END_SRC
 
 ** Galatine
 
-   #+BEGIN_SRC emacs-lisp :tangle local-galatine-windows-nt.el
-     ;;; local-galatine-windows-nt.el --- local init for galatine (Windows)
-
-     ;;; Commentary:
-     ;; THIS IS A GENERATED FILE; changes should be made to README.org
-
-     ;;; Code:
-
-     (setq projectile-project-search-path '("~/Source"))
-     (setq treemacs-python-executable (executable-find "python"))
-     (setq flycheck-python-pycompile-executable (executable-find "python"))
-     (setq ispell-program-name (expand-file-name "~/bin/hunspell-current/bin/hunspell.exe"))
-
-     ;;; local-galatine-windows-nt.el ends here
+   #+BEGIN_SRC emacs-lisp
+     (my/config-for-local-id "galatine.windows-nt"
+       (setq projectile-project-search-path '("~/Source"))
+       (setq treemacs-python-executable (executable-find "python"))
+       (setq flycheck-python-pycompile-executable (executable-find "python"))
+       (setq ispell-program-name (expand-file-name "~/bin/hunspell-current/bin/hunspell.exe")))
    #+END_SRC
 
 ** Milliways
 
-   #+BEGIN_SRC emacs-lisp :tangle local-milliways-gnu-linux.el
-     ;;; local-milliways-gnu-linux.el --- local init for milliways (GNU/Linux)
-
-     ;;; Commentary:
-     ;; THIS IS A GENERATED FILE; changes should be made to README.org
-
-     ;;; Code:
-
-     (setq projectile-project-search-path '("~/src"))
-     (setq treemacs-python-executable (executable-find "python3"))
-
-     ;;; local-milliways-gnu-linux.el ends here
+   #+BEGIN_SRC emacs-lisp
+     (my/config-for-local-id "milliways.gnu/linux"
+       (setq projectile-project-search-path '("~/src"))
+       (setq treemacs-python-executable (executable-find "python3")))
    #+END_SRC
 
 * Coda
 
   #+BEGIN_SRC emacs-lisp :tangle early-init.el
     (message "early bird init complete")
+
+    (provide 'early-init)
     ;;; early-init.el ends here
   #+END_SRC
 
   #+BEGIN_SRC emacs-lisp
+    (message "Loaded %d sections matching local id \"%s\""
+             my/local-config-count *my/local-id*)
     (message "main init complete")
+
+    (provide 'init)
     ;;; init.el ends here
   #+END_SRC
