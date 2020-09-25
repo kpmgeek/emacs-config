@@ -129,6 +129,9 @@
 
 (global-set-key (kbd "M-/") 'hippie-expand)
 
+(add-hook 'text-mode-hook #'flyspell-mode)
+(add-hook 'prog-mode-hook #'flyspell-prog-mode)
+
 (add-hook 'after-init-hook #'server-start)
 
 (setq apropos-do-all t)
@@ -407,6 +410,7 @@
       (setq irony-server-w32-pipe-buffer-size (* 64 1024)))))
 
 (use-package cmake-ide
+  :if nil
   :demand t
   :config (cmake-ide-setup))
 
@@ -572,18 +576,21 @@
 (use-package rustic
   :mode ("\\.rs\\'" . rustic-mode))
 
-(straight-use-package 'auctex)
-(setq TeX-parse-self t) ; Enable parse on load.
-(setq TeX-auto-save t) ; Enable parse on save.
-(setq TeX-view-program-list
-      '(("SumatraPDF"
-         ("SumatraPDF.exe -reuse-instance"
-          (mode-io-correlate " -forward-search \"%b\" %n")
-          " %o")
-         "SumatraPDF")))
-(setq TeX-view-program-selection '((output-pdf "SumatraPDF")))
-(setq TeX-source-correlate-mode t)
-(setq TeX-source-correlate-method 'synctex)
+(use-package tex
+  :straight auctex
+  :mode ("\\.tex\\'" . TeX-latex-mode)
+  :custom
+  (TeX-parse-self t) ; Enable parse on load.
+  (TeX-auto-save t) ; Enable parse on save.
+  (TeX-view-program-list
+   '(("SumatraPDF"
+      ("SumatraPDF.exe -reuse-instance"
+       (mode-io-correlate " -forward-search \"%b\" %n")
+       " %o")
+      "SumatraPDF")))
+  (TeX-view-program-selection '((output-pdf "SumatraPDF")))
+  (TeX-source-correlate-mode t)
+  (TeX-source-correlate-method 'synctex))
 
 (use-package zig-mode
   :commands (zig-mode)

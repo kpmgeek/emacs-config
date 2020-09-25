@@ -468,6 +468,16 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
      (global-set-key (kbd "M-/") 'hippie-expand)
    #+END_SRC
 
+** Spell-Checking
+
+   Enable spell-checking in buffers. It's probably worth setting =ispell-program-name= as
+   appropriate for your machine as well.
+
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'text-mode-hook #'flyspell-mode)
+     (add-hook 'prog-mode-hook #'flyspell-prog-mode)
+   #+END_SRC
+
 ** Emacs Server
 
    By starting an Emacs server, we can use /emacsclient/ to open files in our current
@@ -988,7 +998,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 ** Origami
 
    [[https://github.com/gregsexton/origami.el][origami.el]] is a code-folding minor mode. I don't actually have it set up above, since
-   I mainly found it as a way to implement something lime VIM's source code folding.
+   I mainly found it as a way to implement something like VIM's source code folding.
 
    #+BEGIN_SRC emacs-lisp
      (use-package origami
@@ -1091,6 +1101,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
            (setq irony-server-w32-pipe-buffer-size (* 64 1024)))))
 
      (use-package cmake-ide
+       :if nil
        :demand t
        :config (cmake-ide-setup))
    #+END_SRC
@@ -1335,23 +1346,26 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        :mode ("\\.rs\\'" . rustic-mode))
    #+END_SRC
 
-** TODO TeX
+** TeX
 
-   [[https://github.com/raxod502/straight.el/issues/240][AUCTeX is a pain in the ass to install.]] Need to figure out how to delay-load this.
+   [[https://github.com/raxod502/straight.el/issues/240][AUCTeX is a pain in the ass to install.]]
 
    #+BEGIN_SRC emacs-lisp
-     (straight-use-package 'auctex)
-     (setq TeX-parse-self t) ; Enable parse on load.
-     (setq TeX-auto-save t) ; Enable parse on save.
-     (setq TeX-view-program-list
-           '(("SumatraPDF"
-              ("SumatraPDF.exe -reuse-instance"
-               (mode-io-correlate " -forward-search \"%b\" %n")
-               " %o")
-              "SumatraPDF")))
-     (setq TeX-view-program-selection '((output-pdf "SumatraPDF")))
-     (setq TeX-source-correlate-mode t)
-     (setq TeX-source-correlate-method 'synctex)
+     (use-package tex
+       :straight auctex
+       :mode ("\\.tex\\'" . TeX-latex-mode)
+       :custom
+       (TeX-parse-self t) ; Enable parse on load.
+       (TeX-auto-save t) ; Enable parse on save.
+       (TeX-view-program-list
+        '(("SumatraPDF"
+           ("SumatraPDF.exe -reuse-instance"
+            (mode-io-correlate " -forward-search \"%b\" %n")
+            " %o")
+           "SumatraPDF")))
+       (TeX-view-program-selection '((output-pdf "SumatraPDF")))
+       (TeX-source-correlate-mode t)
+       (TeX-source-correlate-method 'synctex))
    #+END_SRC
 
 ** Zig
@@ -1443,6 +1457,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
      (setq projectile-project-search-path '("~/Source"))
      (setq treemacs-python-executable (executable-find "python"))
      (setq flycheck-python-pycompile-executable (executable-find "python"))
+     (setq ispell-program-name (expand-file-name "~/bin/hunspell-current/bin/hunspell.exe"))
 
      ;;; local-galatine-windows-nt.el ends here
    #+END_SRC
