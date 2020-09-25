@@ -551,6 +551,15 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
      (use-package dash :config (dash-enable-font-lock))
    #+END_SRC
 
+** Initial Frame Size
+
+   Emacs starts with a tiny frame. This is less than useful on modern monitors.
+
+   #+BEGIN_SRC emacs-lisp :tangle early-init.el
+     (add-to-list 'default-frame-alist '(width . 150))
+     (add-to-list 'default-frame-alist '(height . 50))
+   #+END_SRC
+
 ** Fonts
 
    I use [[https://github.com/belluzj/fantasque-sans][Fantasque Sans Mono]] for fixed-pitch text, and [[https://github.com/adobe-fonts/source-serif-pro][Source Serif Pro]] for

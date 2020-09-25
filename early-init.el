@@ -60,6 +60,9 @@
 (when (fboundp 'horizontal-scroll-bar-mode)
   (horizontal-scroll-bar-mode -1))
 
+(add-to-list 'default-frame-alist '(width . 150))
+(add-to-list 'default-frame-alist '(height . 50))
+
 (add-to-list 'default-frame-alist
              '(font . "Fantasque Sans Mono-10"))
 
