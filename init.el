@@ -205,6 +205,33 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (auto-fill-function " $")
   (visual-line-mode))
 
+(defvar my/fortune "https://api.justyy.workers.dev/api/fortune")
+
+(defun my/fortune ()
+  "Insert a fortune from the web into the *scratch* buffer."
+  (interactive)
+  (let ((url-request-method "GET"))
+    (url-retrieve
+     my/fortune
+     (lambda (status)
+       (unless (plist-member status :error)
+         (goto-char (point-min))
+         (re-search-forward "^$")
+         (let ((p (point)))
+           (insert "[")
+           (goto-char (point-max))
+           (insert "]")
+           (goto-char p))
+         (let ((message (car (json-parse-buffer :array-type 'list))))
+           (with-current-buffer "*scratch*"
+             (goto-char (point-max))
+             (let ((p (point)))
+               (insert message)
+               (comment-region p (point)))))
+         (kill-buffer))))))
+
+(my/fortune)
+
 (use-package prescient
   :config (prescient-persist-mode +1))
 
