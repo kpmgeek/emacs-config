@@ -1,8 +1,5 @@
 *.elc
 
-/auto-save-list/
-/backups/
-/elpa/
 /server/
 /straight/build-cache.el
 /straight/build/

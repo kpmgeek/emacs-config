@@ -50,40 +50,6 @@ Additionally, it sets up some things I don't care about: =ido-mode= (I use =ivy=
 for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 =better-defaults= for how to enable them.
 
-** Init File in Org-Mode
-
-   To help keep things organized without creating an explosion of little files, the user
-   configuration all lives in this =org-mode= file, =README.org=. On buffer save, it gets
-   tangled into regular elisp files, =init.el=. If for some reason the auto-tangle doesn't
-   work, it can be trigged manually with =org-babel-tangle= (=C-c C-v t=).
-
-   #+BEGIN_SRC emacs-lisp
-     (defun my/tangle-init ()
-       "Tangle the buffer if it's README.org in the user dir."
-       (when (equal (buffer-file-name)
-                    (expand-file-name "README.org" user-emacs-directory))
-         ;; Avoid running hooks when tangling
-         (let ((prog-mode-hook nil)
-               (org-confirm-babel-evaluate nil))
-           (org-babel-tangle)
-           (byte-compile-file (expand-file-name "init.el" user-emacs-directory)))))
-
-     (add-hook 'after-save-hook 'my/tangle-init)
-   #+END_SRC
-
-   Since =init.el= gets overwritten constantly, leting Emacs add customizations to it
-   isn't very useful. It should put them in a separate file instead. I personally don't
-   use the custom interface, or if I do, I eventually incorporate the changes into this
-   file, but I sometimes spin off versions of my config to help other people get
-   started, and it's good for them to be able to use the customization interface.
-
-   #+BEGIN_SRC emacs-lisp
-     (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
-     (add-hook 'after-init-hook #'(lambda ()
-                                    (message "loading %s" custom-file)
-                                    (load custom-file t)))
-   #+END_SRC
-
 ** Package Management
 
    Package management and configuration is based on a combination of [[https://github.com/jwiegley/use-package][use-package]] for
@@ -128,6 +94,53 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
      (setq use-package-verbose t)
      (straight-use-package 'use-package)
      (require 'bind-key)  ; needed for byte-compilation
+   #+END_SRC
+
+** No Littering
+
+   Emacs and its packages tend to scatter files around madly. The [[https://github.com/emacscollective/no-littering][no-littering]] package
+   helps tidy that up, and replaces a number of paths that I previously configured
+   manually.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package no-littering)
+   #+END_SRC
+
+   I used to have this in my =early-init.el=, but it turns out that several settings need
+   to wait until we get to the main init phase, so here it is, right at the top.
+
+** Init File in Org-Mode
+
+   To help keep things organized without creating an explosion of little files, the user
+   configuration all lives in this =org-mode= file, =README.org=. On buffer save, it gets
+   tangled into regular elisp files, =init.el=. If for some reason the auto-tangle doesn't
+   work, it can be trigged manually with =org-babel-tangle= (=C-c C-v t=).
+
+   #+BEGIN_SRC emacs-lisp
+     (defun my/tangle-init ()
+       "Tangle the buffer if it's README.org in the user dir."
+       (when (equal (buffer-file-name)
+                    (expand-file-name "README.org" user-emacs-directory))
+         ;; Avoid running hooks when tangling
+         (let ((prog-mode-hook nil)
+               (org-confirm-babel-evaluate nil))
+           (org-babel-tangle)
+           (byte-compile-file (expand-file-name "init.el" user-emacs-directory)))))
+
+     (add-hook 'after-save-hook 'my/tangle-init)
+   #+END_SRC
+
+   Since =init.el= gets overwritten constantly, leting Emacs add customizations to it
+   isn't very useful. It should put them in a separate file instead. I personally don't
+   use the custom interface, or if I do, I eventually incorporate the changes into this
+   file, but I sometimes spin off versions of my config to help other people get
+   started, and it's good for them to be able to use the customization interface.
+
+   #+BEGIN_SRC emacs-lisp
+     (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+     (add-hook 'after-init-hook #'(lambda ()
+                                    (message "loading %s" custom-file)
+                                    (load custom-file t)))
    #+END_SRC
 
 ** Platform-Specific Settings
@@ -177,16 +190,6 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
         :config
         (exec-path-from-shell-initialize))
     #+END_SRC
-
-** No Littering
-
-   Emacs and its packages tend to scatter files around madly. The [[https://github.com/emacscollective/no-littering][no-littering]] package
-   helps tidy that up, and replaces a number of paths that I previously configured
-   manually.
-
-   #+BEGIN_SRC emacs-lisp :tangle early-init.el
-     (use-package no-littering)
-   #+END_SRC
 
 ** Safety & Backups
 

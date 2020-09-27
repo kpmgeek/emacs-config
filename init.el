@@ -9,6 +9,8 @@
 ; yelling at me.
 (require 'early-init (expand-file-name "early-init.el" user-emacs-directory))
 
+(use-package no-littering)
+
 (defun my/tangle-init ()
   "Tangle the buffer if it's README.org in the user dir."
   (when (equal (buffer-file-name)

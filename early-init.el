@@ -40,8 +40,6 @@
   (memq window-system '(mac ns))
   "Non-nil if Emacs is running under macOS.")
 
-(use-package no-littering)
-
 (setq inhibit-startup-message t)
 (setq initial-scratch-message nil)
 
