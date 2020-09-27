@@ -1043,6 +1043,29 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        :config (global-git-gutter-mode +1))
    #+END_SRC
 
+   [[https://github.com/magit/git-modes][Git Config Modes]] for editing common config files. Some of these are useful for
+   similar files from other tools (e.g. ignore files).
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package gitattributes-mode
+       :mode (("/\\.gitattributes\\'" . gitattributes-mode)
+              ("/info/attributes\\'" . gitattributes-mode)
+              ("/git/attributes\\'" . gitattributes-mode)))
+
+     (use-package gitconfig-mode
+       :mode (("/\\.gitconfig\\'" . gitconfig-mode)
+              ("/\\.git/config\\'" . gitconfig-mode)
+              ("/modules/.*/config\\'" . gitconfig-mode)
+              ("/git/config\\'" . gitconfig-mode)
+              ("/\\.gitmodules\\'" . gitconfig-mode)
+              ("/etc/gitconfig\\'" . gitconfig-mode)))
+
+     (use-package gitignore-mode
+       :mode (("/\\.gitignore\\'" . gitignore-mode)
+              ("/info/exclude\\'" . gitignore-mode)
+              ("/git/ignore\\'" . gitignore-mode)))
+   #+END_SRC
+
 * Evil
 
   As a VIM refugee with modal editing burned into my fingers, I really like [[https://github.com/emacs-evil/evil][Evil]]. It

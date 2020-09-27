@@ -34,6 +34,7 @@
  ("fringe-helper.el" . "ef4a9c023bae18ec1ddd7265f1f2d6d2e775efdd")
  ("git-gutter" . "2c3242116a42dbbe30fc0844d1ec3c41074cdaba")
  ("git-gutter-fringe" . "da19a474137876b29b5658ee7e9ae366f2b65c1d")
+ ("git-modes" . "55468314a5f6b77d2c96be62c7005ac94545e217")
  ("gnu-elpa-mirror" . "87168508db0553275e6638988f8be1b25782b007")
  ("go-mode.el" . "d17d21060b16a77f9ee28ff453e674225acbf1b1")
  ("goto-chg" . "85fca9f7d8b04be3fbb37cc5d42416f3c4d32830")

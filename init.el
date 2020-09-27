@@ -376,6 +376,24 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :delight git-gutter-mode
   :config (global-git-gutter-mode +1))
 
+(use-package gitattributes-mode
+  :mode (("/\\.gitattributes\\'" . gitattributes-mode)
+         ("/info/attributes\\'" . gitattributes-mode)
+         ("/git/attributes\\'" . gitattributes-mode)))
+
+(use-package gitconfig-mode
+  :mode (("/\\.gitconfig\\'" . gitconfig-mode)
+         ("/\\.git/config\\'" . gitconfig-mode)
+         ("/modules/.*/config\\'" . gitconfig-mode)
+         ("/git/config\\'" . gitconfig-mode)
+         ("/\\.gitmodules\\'" . gitconfig-mode)
+         ("/etc/gitconfig\\'" . gitconfig-mode)))
+
+(use-package gitignore-mode
+  :mode (("/\\.gitignore\\'" . gitignore-mode)
+         ("/info/exclude\\'" . gitignore-mode)
+         ("/git/ignore\\'" . gitignore-mode)))
+
 (use-package evil
   :config
   (evil-mode +1))
