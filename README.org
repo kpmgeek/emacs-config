@@ -40,7 +40,7 @@
     (setq load-prefer-newer t)
   #+END_SRC
 
-[fn:packages] Specifically: =straight.el=, =use-package=, =auto-compile=, =no-littering= and on macOS,
+[fn:packages] Specifically: =straight.el=, =use-package=, =no-littering= and on macOS,
 =exec-path-from-shell=.
 
 [fn:better-defaults] I originally used better-defaults directly, but got fed up with
@@ -84,7 +84,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
                                     (load custom-file t)))
    #+END_SRC
 
-** Package Management & Auto-Compilation
+** Package Management
 
    Package management and configuration is based on a combination of [[https://github.com/jwiegley/use-package][use-package]] for
    declarative package configuration, and [[https://github.com/raxod502/straight.el][straight.el]] for reproducible package
@@ -120,16 +120,6 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
            (goto-char (point-max))
            (eval-print-last-sexp)))
        (load bootstrap-file nil 'nomessage))
-   #+END_SRC
-
-   Startup is much faster if we byte-compile all our libraries. The [[https://github.com/emacscollective/auto-compile][auto-compile]] package
-   automates this. This wants to be set up as early as possible, and this is pretty much
-   the earliest it can be set up during first run.
-
-   #+BEGIN_SRC emacs-lisp :tangle early-init.el
-     (straight-use-package 'auto-compile)
-     (auto-compile-on-load-mode +1)
-     (auto-compile-on-save-mode +1)
    #+END_SRC
 
    Now we can ask =straight.el= to install =use-package= for us.
@@ -1209,6 +1199,20 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
      (use-package cuda-mode
        :mode (("\\.cu\\'" . cuda-mode)
               ("\\.cuh\\'" . cuda-mode)))
+   #+END_SRC
+
+** elisp
+
+   Emacs has pretty much everything you need for working with elisp, but if you're
+   byte-compiling those files, it's good to [[https://github.com/emacscollective/auto-compile][auto-compile]] so that the bytecode stays
+   up-to-date. (Note that =straight.el= will handle compiling packages itself.)
+   This wants to be set up as early as possible, so it goes into our =early-init.el=.
+
+   #+BEGIN_SRC emacs-lisp :tangle early-init.el
+     (use-package auto-compile
+       :config
+       (auto-compile-on-load-mode +1)
+       (auto-compile-on-save-mode +1))
    #+END_SRC
 
 ** fish shell

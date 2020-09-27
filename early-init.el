@@ -22,10 +22,6 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(straight-use-package 'auto-compile)
-(auto-compile-on-load-mode +1)
-(auto-compile-on-save-mode +1)
-
 (setq use-package-verbose t)
 (straight-use-package 'use-package)
 (require 'bind-key)  ; needed for byte-compilation
@@ -77,6 +73,11 @@
   (setq my/dark-theme 'gruvbox-dark-soft)
   (setq my/initial-theme my/dark-theme)
   (load-theme my/initial-theme t))
+
+(use-package auto-compile
+  :config
+  (auto-compile-on-load-mode +1)
+  (auto-compile-on-save-mode +1))
 
 (message "early bird init complete")
 
