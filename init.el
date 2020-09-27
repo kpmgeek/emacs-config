@@ -230,7 +230,7 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
                (comment-region p (point)))))
          (kill-buffer))))))
 
-(my/fortune)
+;; (my/fortune)
 
 (use-package prescient
   :config (prescient-persist-mode +1))
@@ -698,6 +698,10 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 (my/config-for-local-id "milliways.gnu/linux"
   (setq projectile-project-search-path '("~/src"))
   (setq treemacs-python-executable (executable-find "python3")))
+
+(add-to-list 'load-path (expand-file-name "groovy-splash" no-littering-etc-directory))
+(require 'groovy-splash)
+(add-hook 'after-init-hook #'groovy-splash-show)
 
 (message "Loaded %d sections matching local id \"%s\""
          my/local-config-count *my/local-id*)
