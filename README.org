@@ -997,6 +997,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp
      (use-package git-commit
+       :defer t
        :hook (git-commit-mode . (lambda () (setq fill-column 72))))
    #+END_SRC
 

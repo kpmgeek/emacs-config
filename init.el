@@ -349,6 +349,7 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :bind ("C-x g" . magit-status))
 
 (use-package git-commit
+  :defer t
   :hook (git-commit-mode . (lambda () (setq fill-column 72))))
 
 (use-package treemacs-magit
