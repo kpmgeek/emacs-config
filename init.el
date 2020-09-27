@@ -441,25 +441,25 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :hook (((c++-mode c-mode objc-mode) . irony-mode)
          (irony-mode . irony-cdb-autosetup-compile-options))
   :init
-  (progn
-    (when (string= "windows-nt" system-type)
-      (setq exec-path (append exec-path '("~/scoop/apps/llvm/10.0.0/bin"))))
+  (when *my/is-winnt*
+    (add-to-list 'exec-path (expand-file-name "~/scoop/apps/llvm/10.0.0/bin") t)
+
+    ;; Suggested in the documentation to improve performance.
     (when (boundp 'w32-pipe-read-delay)
       (setq w32-pipe-read-delay 0))
     (when (boundp 'w32-pipe-buffer-size)
       (setq irony-server-w32-pipe-buffer-size (* 64 1024)))))
-
-(use-package cmake-ide
-  :if nil
-  :demand t
-  :config (cmake-ide-setup))
 
 (use-package cuda-mode
   :mode (("\\.cu\\'" . cuda-mode)
          ("\\.cuh\\'" . cuda-mode)))
 
 (use-package fish-mode
-  :mode (("\\.fish\\'" . fish-mode)))
+  :hook (fish-mode . (lambda ()
+                       (add-hook 'before-save-hook 'fish_indent-before-save)))
+  :mode (("\\.fish\\'" . fish-mode)
+         ("/fish_funced\\..*\\'" . fish-mode))
+  :interpreter ("fish" . fish-mode))
 
 ;; (use-package company-go)
 (use-package go-mode
@@ -476,21 +476,14 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (use-package lua-mode
   :commands (lua-mode)
-  :mode ("\\.lua\\'" . lua-mode))
+  :mode ("\\.lua\\'" . lua-mode)
+  :interpreter ("lua" . lua-mode))
 
 (use-package markdown-mode
-  :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown"))
-
-(use-package matlab-mode
-  :mode "\\.m\\'"
-  :init
-  (progn
-    (setq matlab-indent-function t)  ; TODO figure out what this does
-    (setq matlab-shell-command "/usr/local/bin/matlab")))
+  :custom (markdown-command '("pandoc" "--from=markdown" "--to=html5")))
 
 (use-package org
   :mode ("\\.org\\'" . org-mode)
@@ -528,25 +521,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (use-package org-d20
   :commands org-d20-mode)
-
-;; (defun my/ocaml/init-opam ()
-;;   (if (executable-find "opam")
-;;       (let ((share (string-trim-right
-;;                     (with-output-to-string
-;;                       (with-current-buffer
-;;                           standard-output
-;;                         (process-file
-;;                          shell-file-name nil '(t nil) nil shell-command-switch
-;;                          "opam config var share"))))))
-;;         (cond ((string= "" share)
-;;                (message "warning: `%s' output empty string." "opam config var share"))
-;;               ((not (file-directory-p share))
-;;                (message "%s" "warning: opam share directory does not exist."))
-;;               (t (setq opam-share share
-;;                        opam-load-path (concat share "/emacs/site-lisp"))
-;;                  (add-to-list 'load-path opam-load-path))))
-;;     (unless (executable-find "ocamlmerlin")
-;;       (message "warning: cannot find `%s' or `%s' executable." "opam" "merlin"))))
 
 (use-package tuareg
   :mode (("\\.ml[ily]?$" . tuareg-mode)
@@ -592,9 +566,9 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (use-package dune
   :mode ("\\(?:\\`\\|/\\)dune\\(?:\\.inc\\)?\\'" . dune-mode)
-  :commands (dune-promote dune-runtest-and-promote))
-
-(with-eval-after-load 'projectile
+  :commands (dune-promote dune-runtest-and-promote)
+  :after projectile
+  :init
   (projectile-register-project-type
    'dune '("dune-project")
    :compile "dune build"
@@ -616,7 +590,7 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 (use-package rustic
   :mode ("\\.rs\\'" . rustic-mode))
 
-(use-package tex
+(use-package tex-site
   :straight auctex
   :mode ("\\.tex\\'" . TeX-latex-mode)
   :custom
@@ -642,15 +616,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
    'zig '("build.zig")
    :compile "zig build"
    :test "zig build"))
-
-(with-eval-after-load "lsp-mode"
-  (add-to-list 'lsp-language-id-configuration '(zig-mode . "zig"))
-  (lsp-register-client
-   (make-lsp-client
-    :new-connection (lsp-stdio-connection
-                     (expand-file-name "~/Source/zls/zig-cache/bin/zls.exe"))
-    :major-modes '(zig-mode)
-    :server-id 'zls)))
 
 (defconst *my/local-id*
   (format "%s.%s" (downcase (system-name)) system-type)

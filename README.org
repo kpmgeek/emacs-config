@@ -1185,34 +1185,43 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
      (delight 'eldoc-mode nil t)
    #+END_SRC
 
-** C/C++
+** TODO C/C++
+
+   Still need to test some of this, get the kinks worked out on Windows, and review
+   [[https://oremacs.com/2017/03/28/emacs-cpp-ide/]] for more stuff. Maybe pull in the
+   packages suggested on the irony-mode page, too.
+
+   Emacs already has a respectable C/C++ mode, but [[https://github.com/Sarcasm/irony-mode][irony-mode]] can take advantage of
+   libclang to improve the experience.
 
    #+BEGIN_SRC emacs-lisp
      (use-package irony
        :hook (((c++-mode c-mode objc-mode) . irony-mode)
               (irony-mode . irony-cdb-autosetup-compile-options))
        :init
-       (progn
-         (when (string= "windows-nt" system-type)
-           (setq exec-path (append exec-path '("~/scoop/apps/llvm/10.0.0/bin"))))
+       (when *my/is-winnt*
+         (add-to-list 'exec-path (expand-file-name "~/scoop/apps/llvm/10.0.0/bin") t)
+
+         ;; Suggested in the documentation to improve performance.
          (when (boundp 'w32-pipe-read-delay)
            (setq w32-pipe-read-delay 0))
          (when (boundp 'w32-pipe-buffer-size)
            (setq irony-server-w32-pipe-buffer-size (* 64 1024)))))
-
-     (use-package cmake-ide
-       :if nil
-       :demand t
-       :config (cmake-ide-setup))
    #+END_SRC
 
-** CUDA
+   In theory [[https://github.com/atilaneves/cmake-ide][cmake-ide]] should provide a bunch of bells and whistles, but the
+   documentation is a bit sparse. [[https://github.com/randomphrase/company-c-headers][company-c-headers]] might be worth a look as well.
 
-   #+BEGIN_SRC emacs-lisp
-     (use-package cuda-mode
-       :mode (("\\.cu\\'" . cuda-mode)
-              ("\\.cuh\\'" . cuda-mode)))
-   #+END_SRC
+*** CUDA
+
+    A simple [[https://github.com/chachi/cuda-mode][cuda-mode]] which provides font-lock features. Could get most of the way
+    there by just adding entries for =c++-mode= to =auto-mode-alist=.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package cuda-mode
+        :mode (("\\.cu\\'" . cuda-mode)
+               ("\\.cuh\\'" . cuda-mode)))
+    #+END_SRC
 
 ** elisp
 
@@ -1230,12 +1239,22 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 ** fish shell
 
+   A [[https://github.com/wwwjfy/emacs-fish][fish-mode]] for working with [[https://fishshell.com/][fish shell]], which is what I use on UNIXy systems.
+
    #+BEGIN_SRC emacs-lisp
      (use-package fish-mode
-       :mode (("\\.fish\\'" . fish-mode)))
+       :hook (fish-mode . (lambda ()
+                            (add-hook 'before-save-hook 'fish_indent-before-save)))
+       :mode (("\\.fish\\'" . fish-mode)
+              ("/fish_funced\\..*\\'" . fish-mode))
+       :interpreter ("fish" . fish-mode))
    #+END_SRC
 
-** Go
+** TODO Go
+
+   Golang development with [[https://github.com/dominikh/go-mode.el][go-mode.el]]. I tried out [[https://github.com/mdempsky/gocode][company-go]] but it turned out to be
+   intolerably slow; I understand that using LSP with [[https://github.com/golang/tools/blob/master/gopls/README.md][gopls]] is now the preferred option.
+   I haven't done much Go lately so this will sit around as-is until I need it again.
 
    #+BEGIN_SRC emacs-lisp
      ;; (use-package company-go)
@@ -1254,29 +1273,37 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 ** Lua
 
+   [[https://immerrr.github.io/lua-mode/][lua-mode]] for writing Lua.
+
    #+BEGIN_SRC emacs-lisp
      (use-package lua-mode
        :commands (lua-mode)
-       :mode ("\\.lua\\'" . lua-mode))
+       :mode ("\\.lua\\'" . lua-mode)
+       :interpreter ("lua" . lua-mode))
    #+END_SRC
 
 ** Markdown
 
+   [[https://github.com/jrblevin/markdown-mode][Markdown Mode]] for writing Markdown.
+
    #+BEGIN_SRC emacs-lisp
      (use-package markdown-mode
-       :commands (markdown-mode gfm-mode)
        :mode (("README\\.md\\'" . gfm-mode)
               ("\\.md\\'" . markdown-mode)
               ("\\.markdown\\'" . markdown-mode))
-       :init (setq markdown-command "multimarkdown"))
+       :custom (markdown-command '("pandoc" "--from=markdown" "--to=html5")))
    #+END_SRC
 
-** MATLAB
+** TODO MATLAB
 
-   Normally, =.m= files are treated as Objective-C files. I don't really do any ObjC, so
-   they're going to be treated as MATLAB files instead.
+   There's a [[http://matlab-emacs.sourceforge.net/][MATLAB/Emacs integration]] mode. Normally, =.m= files are treated as
+   Objective-C files. I don't really do any ObjC, so they're going to be treated as
+   MATLAB files instead.
 
-   #+BEGIN_SRC emacs-lisp
+   Except I don't do MATLAB anymore either, so this is disabled until it once again
+   darkens my desktop.
+
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package matlab-mode
        :mode "\\.m\\'"
        :init
@@ -1286,6 +1313,9 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    #+END_SRC
 
 ** Org-Mode
+
+   Of course we want the full-fat [[https://orgmode.org/][Org mode]]. Which I really should learn to use more
+   effectively.
 
    #+BEGIN_SRC emacs-lisp
      (use-package org
@@ -1298,6 +1328,9 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        (org-hide-emphasis-markers t))
    #+END_SRC
 
+   [[https://github.com/hniksic/emacs-htmlize][htmlize]] isn't /strictly/ part of Org, but it's needed for the export to HTML feature
+   and I'm not really sure where else to put it.
+
    #+BEGIN_SRC emacs-lisp
      (use-package htmlize
        :commands (htmlize-buffer
@@ -1306,6 +1339,11 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
                   htmlize-many-files
                   htmlize-many-files-dired))
    #+END_SRC
+
+   This uses [[https://github.com/cadadr/elisp/blob/devel/org-variable-pitch.el][org-variable-pitch.el]] to make Org buffers, which tend to be full of running
+   text, more readable. I honestly thought this wouldn't be very good but so far I quite
+   like it. It /does/ mess up the autocomplete popup unless you're using something like
+   =company-box=, though.
 
    #+BEGIN_SRC emacs-lisp
      (delight 'buffer-face-mode nil t)
@@ -1327,6 +1365,10 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        (set-face-attribute 'org-level-8 nil :height (+ 1.0 (expt 0.5 7))))
    #+END_SRC
 
+   [[https://spwhitton.name/tech/code/org-d20/][org-d20]] provides RPG tools for Org. I should really learn how to use this, and maybe
+   also move my campaign notes out a crappy notepad file now that I have Emacs starting
+   up faster.
+
    #+BEGIN_SRC emacs-lisp
      (use-package org-d20
        :commands org-d20-mode)
@@ -1334,31 +1376,37 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 ** TODO Ocaml
 
-   #+NAME: packages/ocaml
-   | Package        | Description     |
-   |----------------+-----------------|
-   | ggtags         |                 |
+   This is a huge mess of stuff that I found somewhere and didn't bother to write down
+   the URL where I found it, so now I have to puzzle it back out again. Apparently
+   [[https://github.com/leoliu/ggtags][ggtags]] was involved somehow but I never actually got it set up. Better annotations
+   when I fix this next time I try to write some Ocaml.
 
-   #+BEGIN_SRC emacs-lisp
-     ;; (defun my/ocaml/init-opam ()
-     ;;   (if (executable-find "opam")
-     ;;       (let ((share (string-trim-right
-     ;;                     (with-output-to-string
-     ;;                       (with-current-buffer
-     ;;                           standard-output
-     ;;                         (process-file
-     ;;                          shell-file-name nil '(t nil) nil shell-command-switch
-     ;;                          "opam config var share"))))))
-     ;;         (cond ((string= "" share)
-     ;;                (message "warning: `%s' output empty string." "opam config var share"))
-     ;;               ((not (file-directory-p share))
-     ;;                (message "%s" "warning: opam share directory does not exist."))
-     ;;               (t (setq opam-share share
-     ;;                        opam-load-path (concat share "/emacs/site-lisp"))
-     ;;                  (add-to-list 'load-path opam-load-path))))
-     ;;     (unless (executable-find "ocamlmerlin")
-     ;;       (message "warning: cannot find `%s' or `%s' executable." "opam" "merlin"))))
+   I'm pretty sure this function is supposed to hunt down an elisp file that =opam=
+   creates for me, but I need to teach it about Windows too I guess. Right now it's
+   disabled so I don't get errors.
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+     (defun my/ocaml/init-opam ()
+       (if (executable-find "opam")
+           (let ((share (string-trim-right
+                         (with-output-to-string
+                           (with-current-buffer
+                               standard-output
+                             (process-file
+                              shell-file-name nil '(t nil) nil shell-command-switch
+                              "opam config var share"))))))
+             (cond ((string= "" share)
+                    (message "warning: `%s' output empty string." "opam config var share"))
+                   ((not (file-directory-p share))
+                    (message "%s" "warning: opam share directory does not exist."))
+                   (t (setq opam-share share
+                            opam-load-path (concat share "/emacs/site-lisp"))
+                      (add-to-list 'load-path opam-load-path))))
+         (unless (executable-find "ocamlmerlin")
+           (message "warning: cannot find `%s' or `%s' executable." "opam" "merlin"))))
    #+END_SRC
+
+   [[https://github.com/ocaml/tuareg][Tuareg]]
 
    #+BEGIN_SRC emacs-lisp
      (use-package tuareg
@@ -1374,6 +1422,8 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
            (add-to-list 'completion-ignored-extensions ext))))
    #+END_SRC
 
+   [[https://github.com/ocaml/merlin][Merlin]]
+
    #+BEGIN_SRC emacs-lisp
      (use-package merlin
        :delight (merlin-mode " ⚗")
@@ -1383,16 +1433,22 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
          (add-to-list 'company-backends 'merlin-company-backend)))
    #+END_SRC
 
+   [[https://github.com/OCamlPro/ocp-indent][ocp-indent]]
+
    #+BEGIN_SRC emacs-lisp
      (use-package ocp-indent
        :hook (tuareg-mode . ocp-indent-caml-mode-setup))
    #+END_SRC
+
+   ... this should probably be up there in the Tuareg block.
 
    #+BEGIN_SRC emacs-lisp
      (with-eval-after-load 'smartparens
        (sp-local-pair 'tuareg-mode "'" nil :actions nil)
        (sp-local-pair 'tuareg-mode "`" nil :actions nil))
    #+END_SRC
+
+   Setup for an inferior [[https://github.com/ocaml-community/utop][utop]].
 
    #+BEGIN_SRC emacs-lisp
      (use-package utop
@@ -1405,6 +1461,8 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
            (message "warning: cannot find `opam' executable."))))
    #+END_SRC
 
+   [[https://github.com/flycheck/flycheck-ocaml][flycheck-ocaml]]
+
    #+BEGIN_SRC emacs-lisp
      (use-package flycheck-ocaml
        :after (flycheck merlin)
@@ -1414,14 +1472,14 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
          (flycheck-ocaml-setup)))
    #+END_SRC
 
-   Register a projectile project type for Dune.
+   Syntax highlighting and Projectile project type for [[https://github.com/ocaml/dune/tree/master/editor-integration/emacs][dune]].
 
    #+BEGIN_SRC emacs-lisp
      (use-package dune
        :mode ("\\(?:\\`\\|/\\)dune\\(?:\\.inc\\)?\\'" . dune-mode)
-       :commands (dune-promote dune-runtest-and-promote))
-
-     (with-eval-after-load 'projectile
+       :commands (dune-promote dune-runtest-and-promote)
+       :after projectile
+       :init
        (projectile-register-project-type
         'dune '("dune-project")
         :compile "dune build"
@@ -1455,17 +1513,20 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 ** Rust
 
+   There are multiple Rust modes, and I settled on [[https://github.com/brotzeit/rustic][Rustic]] for undocumented reasons.
+
    #+BEGIN_SRC emacs-lisp
      (use-package rustic
        :mode ("\\.rs\\'" . rustic-mode))
    #+END_SRC
 
-** TeX
+** TODO TeX
 
-   [[https://github.com/raxod502/straight.el/issues/240][AUCTeX is a pain in the ass to install.]]
+   So there's a built-in TeX mode, or we can add [[https://www.gnu.org/software/auctex/][AUCTeX]]. Right now this assumes we're on
+   Windows, using [[https://www.sumatrapdfreader.org/free-pdf-reader.html][Sumatra PDF]] as a viewer.
 
    #+BEGIN_SRC emacs-lisp
-     (use-package tex
+     (use-package tex-site
        :straight auctex
        :mode ("\\.tex\\'" . TeX-latex-mode)
        :custom
@@ -1484,12 +1545,16 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 ** Zig
 
+   [[https://github.com/ziglang/zig-mode][zig-mode]] for syntax highlighting and auto-indentation.
+
    #+BEGIN_SRC emacs-lisp
      (use-package zig-mode
        :commands (zig-mode)
        :hook (zig-mode . lsp)
        :mode ("\\.zig\\'" . zig-mode))
    #+END_SRC
+
+   Projectile integration.
 
    #+BEGIN_SRC emacs-lisp
      (with-eval-after-load 'projectile
@@ -1499,7 +1564,11 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
         :test "zig build"))
    #+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+   ... so I tried to set up an LSP server for Zig, but right now it crashes whenever I
+   open more than one file, which is a bit of of a non-starter. Also, makes
+   Windows-specific assumptions.
+
+   #+BEGIN_SRC emacs-lisp :tangle no
      (with-eval-after-load "lsp-mode"
        (add-to-list 'lsp-language-id-configuration '(zig-mode . "zig"))
        (lsp-register-client
