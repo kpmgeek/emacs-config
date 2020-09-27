@@ -378,7 +378,22 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
          ("/info/exclude\\'" . gitignore-mode)
          ("/git/ignore\\'" . gitignore-mode)))
 
+(defun my/c-c ()
+  "Start a key sequence for a major mode command."
+  (interactive)
+  (setq unread-command-events (listify-key-sequence (kbd "C-c"))))
+
+(defun my/c-x ()
+  "Start a key sequence for a general command."
+  (interactive)
+  (setq unread-command-events (listify-key-sequence (kbd "C-x"))))
+
 (use-package evil
+  :demand t
+  :bind (("C-x SPC" . counsel-M-x)      ; available as SPC SPC
+         :map evil-normal-state-map
+         ("SPC" . my/c-x)
+         ("," . my/c-c))
   :config
   (evil-mode +1))
 
