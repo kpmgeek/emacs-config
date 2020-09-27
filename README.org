@@ -692,6 +692,18 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        (visual-line-mode))
    #+END_SRC
 
+** Nicer Form Feeds
+
+   Some elisp files use the form-feed character to separate sections (along with some
+   Emacs modes---I'm looking at you, =elisp-compile-mode=). We can display them as lines
+   using [[https://github.com/purcell/page-break-lines][page-break-lines]] (or [[https://depp.brause.cc/form-feed/][form-feed]], if you're using Emacs in text mode).
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package page-break-lines
+       :delight page-break-lines-mode
+       :config (global-page-break-lines-mode +1))
+   #+END_SRC
+
 * Core Enhancements
 
   This is, effectively, part 2 of the [[Prelude]] section. The difference is that while the

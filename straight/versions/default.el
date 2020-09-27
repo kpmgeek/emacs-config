@@ -62,6 +62,7 @@
  ("org-d20" . "7ede5726d640c4f81146585f6eb907f51a0f6a19")
  ("origami.el" . "e558710a975e8511b9386edc81cd6bdd0a5bda74")
  ("packed" . "c41c3dfda86ae33832ffc146923e2a4675cbacfa")
+ ("page-break-lines" . "f8c4cd7fc67638ae4113551dcffdf87fcd252d9b")
  ("paredit" . "8330a41e8188fe18d3fa805bb9aa529f015318e8")
  ("pfuture" . "d7926de3ba0105a36cfd00811fd6278aea903eef")
  ("pkg-info" . "76ba7415480687d05a4353b27fea2ae02b8d9d61")

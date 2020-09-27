@@ -207,6 +207,10 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (auto-fill-function " $")
   (visual-line-mode))
 
+(use-package page-break-lines
+  :delight page-break-lines-mode
+  :config (global-page-break-lines-mode +1))
+
 (use-package prescient
   :config (prescient-persist-mode +1))
 
