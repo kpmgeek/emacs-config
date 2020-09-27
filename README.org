@@ -1016,6 +1016,14 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        :bind ("C-x g" . magit-status))
    #+END_SRC
 
+   We do need to tell =auto-fill-mode= to wrap at 72 instead of whatever it was wrapping
+   at before. (The =git-commit= package is part of Magit.)
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package git-commit
+       :hook (git-commit-mode . (lambda () (setq fill-column 72))))
+   #+END_SRC
+
    Treemacs provides a Magit integration so that it knows when to redo highlighting for
    which files are staged/unstaged.
 
