@@ -694,7 +694,13 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 (add-to-list 'load-path (expand-file-name "groovy-splash" no-littering-etc-directory))
 (use-package groovy-splash
   :straight nil
-  :hook (after-init . groovy-splash-show))
+  :hook (after-init . groovy-splash-show)
+  :custom
+  (groovy-splash-segments '(groovy-splash-groovy-fill
+                            groovy-splash-blank-line
+                            groovy-splash-logo
+                            groovy-splash-blank-fill
+                            groovy-splash-oracle)))
 
 (message "Loaded %d sections matching local id \"%s\""
          my/local-config-count *my/local-id*)

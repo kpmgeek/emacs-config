@@ -11,6 +11,14 @@
 (require 'dash)
 (require 'all-the-icons)
 
+(defgroup groovy-splash nil
+  "A groovy Emacs splash screen"
+  :group 'applications
+  :prefix "groovy-splash-")
+
+
+;;; Utility Functions
+
 (defun groovy-splash--center-line ()
   "Visually center the current line."
 
@@ -21,43 +29,10 @@
                         'display `(space . (:align-to (- center (0.5 . (,w))))))))
   (end-of-line))
 
-(defun groovy-splash-logo (width height &optional no-draw)
-  "Insert logo and version into buffer.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
-
-  (ignore width height)
-  (let ((icon-height 10))
-    (unless no-draw
-      ;; This is a little tricky because we want to specify the height in lines, but the
-      ;; icon will make the line a little too big. So what we do is insert it, measure
-      ;; it, then adjust the size.
-      (insert "\n ")                    ; extra space to calculate line height
-      (-let [(_ . base-px-height)
-             (window-text-pixel-size (get-buffer-window)
-                                     (line-beginning-position) (point))]
-        (insert (all-the-icons-fileicon "emacs"
-                                        :height icon-height
-                                        :v-adjust 0))
-        (-let* (((_ .  initial-px-height)
-                 (window-text-pixel-size (get-buffer-window)
-                                         (line-beginning-position) (point)))
-                (px-height (* icon-height base-px-height))
-                (new-height (/ (* (float icon-height) px-height) initial-px-height)))
-          (delete-char -2)
-          (insert (all-the-icons-fileicon "emacs"
-                                          :height new-height
-                                          :v-adjust 0
-                                          :face 'all-the-icons-purple))))
-      (groovy-splash--center-line)
-      (insert (concat
-               "\n\n"
-               (propertize "GNU Emacs" 'face 'bold)
-               " "
-               (format "%d.%d" emacs-major-version emacs-minor-version)))
-      (groovy-splash--center-line) (insert "\n"))
-    (+ icon-height 3)))
+
+;;; Vertical fill segments
+;; These return 0 when asked for their height, and draw themselves at the height
+;; requested by the HEIGHT parameter.
 
 (defun groovy-splash-blank-line (width height &optional no-draw)
   "Insert a blank line.
@@ -97,6 +72,50 @@ non-nil, don't actually insert the section."
         (groovy-splash--center-line) (insert "\n"))))
   0)
 
+
+;;; Banner segments
+
+(defun groovy-splash-logo (width height &optional no-draw)
+  "Insert logo and version into buffer.
+Returns the minimum height in lines of the section. WIDTH is the
+buffer width, HEIGHT is the allocated height. If NO-DRAW is
+non-nil, don't actually insert the section."
+
+  (ignore width height)
+  (let ((icon-height 10))
+    (unless no-draw
+      ;; This is a little tricky because we want to specify the height in lines, but the
+      ;; icon will make the line a little too big. So what we do is insert it, measure
+      ;; it, then adjust the size.
+      (insert " ")                    ; extra space to calculate line height
+      (-let [(_ . base-px-height)
+             (window-text-pixel-size (get-buffer-window)
+                                     (line-beginning-position) (point))]
+        (insert (all-the-icons-fileicon "emacs"
+                                        :height icon-height
+                                        :v-adjust 0))
+        (-let* (((_ .  initial-px-height)
+                 (window-text-pixel-size (get-buffer-window)
+                                         (line-beginning-position) (point)))
+                (px-height (* icon-height base-px-height))
+                (new-height (/ (* (float icon-height) px-height) initial-px-height)))
+          (delete-char -2)
+          (insert (all-the-icons-fileicon "emacs"
+                                          :height new-height
+                                          :v-adjust 0
+                                          :face 'all-the-icons-purple))))
+      (groovy-splash--center-line)
+      (insert (concat
+               "\n\n"
+               (propertize "GNU Emacs" 'face 'bold)
+               " "
+               (format "%d.%d" emacs-major-version emacs-minor-version)))
+      (groovy-splash--center-line) (insert "\n"))
+    (+ icon-height 2)))
+
+
+;;; Button segments
+
 (defun groovy-splash-recover-session-button (width height &optional no-draw)
   "Insert a button to recover the last session.
 Returns the minimum height in lines of the section. WIDTH is the
@@ -117,7 +136,10 @@ non-nil, don't actually insert the section."
     (insert "\n"))
   1)
 
-(defvar groovy-splash-oracle-phrases-8ball
+
+;;; Oracle segment
+
+(defconst groovy-splash-oracle-phrases-8ball
   '("IT IS CERTAIN"
     "IT IS DECIDEDLY SO"
     "WITHOUT A DOUBT"
@@ -137,9 +159,10 @@ non-nil, don't actually insert the section."
     "MY REPLY IS NO"
     "MY SOURCES SAY NO"
     "OUTLOOK NOT SO GOOD"
-    "VERY DOUBTFUL"))
+    "VERY DOUBTFUL")
+  "Magic 8-ball oracle phrases.")
 
-(defvar groovy-splash-oracle-phrases-zen
+(defconst groovy-splash-oracle-phrases-zen
   `(;; The Human Route
     "LIFE IS LIKE A FLOATING CLOUD WHICH APPEARS"
     "DEATH IS LIKE A FLOATING CLOUD WHICH DISAPPEARS"
@@ -168,17 +191,25 @@ non-nil, don't actually insert the section."
 
     ;; Not Zen
     "42"
-    ))
+    )
+  "Zen oracle phrases.")
 
-(defvar groovy-splash-oracle-phrases groovy-splash-oracle-phrases-8ball)
+(defcustom groovy-splash-oracle-phrases
+  groovy-splash-oracle-phrases-8ball
+  "A list of strings for the oracle to choose from."
+  :type '(repeat string)
+  :group 'groovy-splash)
 
 (defvar groovy-splash--oracle-current-phrase nil)
 
 (defun groovy-splash--oracle-phrase ()
+  "Get the current oracle phrase.
+If one hasn't been picked yet, pick one."
   (or groovy-splash--oracle-current-phrase
       (groovy-splash--refresh-oracle)))
 
 (defun groovy-splash--refresh-oracle ()
+  "Get a new oracle phrase."
   (setq groovy-splash--oracle-current-phrase
         (nth (random (length groovy-splash-oracle-phrases)) groovy-splash-oracle-phrases)))
 
@@ -206,16 +237,26 @@ non-nil, don't actually insert the section."
     (groovy-splash--center-line) (insert "\n"))
   1)
 
-;; TODO make this a defcustom
-(defvar groovy-splash-segments
+
+;;; Main drawing code
+
+(defcustom groovy-splash-segments
   '(groovy-splash-groovy-fill
+    groovy-splash-blank-line
     groovy-splash-logo
     groovy-splash-blank-fill
     groovy-splash-recover-session-button
     groovy-splash-blank-line
-    groovy-splash-oracle))
+    groovy-splash-oracle)
+  "Segments to display on the splash screen."
+  :type '(repeat (choice (function :tag "Segment function")
+                         (string :tag "Literal text")))
+  :group 'groovy-splash)
 
 (defun groovy-splash--redraw (&optional force)
+  "Redraw the splash screen.
+If FORCE is non-nil, redraw the screen even if it isn't in a
+visible buffer."
   (let* ((splash-buffer (get-buffer-create "*groovy-splash*"))
          (splash-window (get-buffer-window splash-buffer)))
     (when (or force splash-window)
@@ -257,7 +298,7 @@ non-nil, don't actually insert the section."
         (read-only-mode +1)))))
 
 (defun groovy-splash-show ()
-  "Emacs startup screen"
+  "Show the splash screen."
   (interactive)
 
   (let ((splash-buffer (get-buffer-create "*groovy-splash*")))

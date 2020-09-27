@@ -1705,7 +1705,13 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
      (add-to-list 'load-path (expand-file-name "groovy-splash" no-littering-etc-directory))
      (use-package groovy-splash
        :straight nil
-       :hook (after-init . groovy-splash-show))
+       :hook (after-init . groovy-splash-show)
+       :custom
+       (groovy-splash-segments '(groovy-splash-groovy-fill
+                                 groovy-splash-blank-line
+                                 groovy-splash-logo
+                                 groovy-splash-blank-fill
+                                 groovy-splash-oracle)))
    #+END_SRC
 
 * Coda
