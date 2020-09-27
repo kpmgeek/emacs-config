@@ -614,7 +614,6 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
      (global-prettify-symbols-mode -1)
    #+END_SRC
 
-
 ** Color Scheme
 
    I personally like [[https://github.com/morhetz/gruvbox][gruvbox]] ([[https://github.com/greduan/emacs-theme-gruvbox][Emacs version]]), which provides both dark and light versions
@@ -689,44 +688,6 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        (auto-fill-function " $")
        (visual-line-mode))
    #+END_SRC
-
-** Fortune
-
-   Gets a fortune from the web, and displays it in the =*scratch*= buffer. On UNIX, we
-   could use the actual /fortune/ program, but I can't find a port of it for Windows.
-
-   #+BEGIN_SRC emacs-lisp
-     (defvar my/fortune "https://api.justyy.workers.dev/api/fortune")
-
-     (defun my/fortune ()
-       "Insert a fortune from the web into the *scratch* buffer."
-       (interactive)
-       (let ((url-request-method "GET"))
-         (url-retrieve
-          my/fortune
-          (lambda (status)
-            (unless (plist-member status :error)
-              (goto-char (point-min))
-              (re-search-forward "^$")
-              (let ((p (point)))
-                (insert "[")
-                (goto-char (point-max))
-                (insert "]")
-                (goto-char p))
-              (let ((message (car (json-parse-buffer :array-type 'list))))
-                (with-current-buffer "*scratch*"
-                  (goto-char (point-max))
-                  (let ((p (point)))
-                    (insert message)
-                    (comment-region p (point)))))
-              (kill-buffer))))))
-
-     ;; (my/fortune)
-   #+END_SRC
-
-   Potentially a better option would just be to teach Emacs how to read fortune files
-   itself. Also, the output would probably look nicer in a formatted buffer, rather than
-   tossed into an elisp buffer as a comment.
 
 * Core Enhancements
 
@@ -1523,14 +1484,6 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
          :server-id 'zls)))
    #+END_SRC
 
-* Miscellanea
-
-** TRAMP
-
-   #+BEGIN_SRC emacs-lisp
-     (setq-default explicit-shell-file-name "/bin/bash")
-   #+END_SRC
-
 * Machine-Specific Settings
 
   Machine-specific settings are loaded by keying off of an string constructed from the
@@ -1584,12 +1537,63 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 * Playground
 
+  Experimental, ad-hoc, questionable, and poorly-understood configuration sections.
+
+** TRAMP
+
+   I'm not quite sure what this is trying to accomplish, or whether it accomplished it.
+
+   #+BEGIN_SRC emacs-lisp
+     (setq-default explicit-shell-file-name "/bin/bash")
+   #+END_SRC
+
+** Fortune
+
+   Gets a fortune from the web, and displays it in the =*scratch*= buffer. On UNIX, we
+   could use the actual /fortune/ program, but I can't find a port of it for Windows.
+
+   #+BEGIN_SRC emacs-lisp
+     (defvar my/fortune "https://api.justyy.workers.dev/api/fortune")
+
+     (defun my/fortune ()
+       "Insert a fortune from the web into the *scratch* buffer."
+       (interactive)
+       (let ((url-request-method "GET"))
+         (url-retrieve
+          my/fortune
+          (lambda (status)
+            (unless (plist-member status :error)
+              (goto-char (point-min))
+              (re-search-forward "^$")
+              (let ((p (point)))
+                (insert "[")
+                (goto-char (point-max))
+                (insert "]")
+                (goto-char p))
+              (let ((message (car (json-parse-buffer :array-type 'list))))
+                (with-current-buffer "*scratch*"
+                  (goto-char (point-max))
+                  (let ((p (point)))
+                    (insert message)
+                    (comment-region p (point)))))
+              (kill-buffer))))))
+
+     ;; (my/fortune)
+   #+END_SRC
+
+   Potentially a better option would just be to teach Emacs how to read fortune files
+   itself. Also, the output would probably look nicer in a formatted buffer, rather than
+   tossed into an elisp buffer as a comment.
+
 ** TODO Splash Screen
+
+   A groovy splash screen. Currently included in this repo.
 
    #+BEGIN_SRC emacs-lisp
      (add-to-list 'load-path (expand-file-name "groovy-splash" no-littering-etc-directory))
-     (require 'groovy-splash)
-     (add-hook 'after-init-hook #'groovy-splash-show)
+     (use-package groovy-splash
+       :straight nil
+       :hook (after-init . groovy-splash-show))
    #+END_SRC
 
 * Coda

@@ -205,33 +205,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (auto-fill-function " $")
   (visual-line-mode))
 
-(defvar my/fortune "https://api.justyy.workers.dev/api/fortune")
-
-(defun my/fortune ()
-  "Insert a fortune from the web into the *scratch* buffer."
-  (interactive)
-  (let ((url-request-method "GET"))
-    (url-retrieve
-     my/fortune
-     (lambda (status)
-       (unless (plist-member status :error)
-         (goto-char (point-min))
-         (re-search-forward "^$")
-         (let ((p (point)))
-           (insert "[")
-           (goto-char (point-max))
-           (insert "]")
-           (goto-char p))
-         (let ((message (car (json-parse-buffer :array-type 'list))))
-           (with-current-buffer "*scratch*"
-             (goto-char (point-max))
-             (let ((p (point)))
-               (insert message)
-               (comment-region p (point)))))
-         (kill-buffer))))))
-
-;; (my/fortune)
-
 (use-package prescient
   :config (prescient-persist-mode +1))
 
@@ -669,8 +642,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
     :major-modes '(zig-mode)
     :server-id 'zls)))
 
-(setq-default explicit-shell-file-name "/bin/bash")
-
 (defconst *my/local-id*
   (format "%s.%s" (downcase (system-name)) system-type)
   "Hostname-based identifier for the current installation.")
@@ -699,9 +670,39 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (setq projectile-project-search-path '("~/src"))
   (setq treemacs-python-executable (executable-find "python3")))
 
+(setq-default explicit-shell-file-name "/bin/bash")
+
+(defvar my/fortune "https://api.justyy.workers.dev/api/fortune")
+
+(defun my/fortune ()
+  "Insert a fortune from the web into the *scratch* buffer."
+  (interactive)
+  (let ((url-request-method "GET"))
+    (url-retrieve
+     my/fortune
+     (lambda (status)
+       (unless (plist-member status :error)
+         (goto-char (point-min))
+         (re-search-forward "^$")
+         (let ((p (point)))
+           (insert "[")
+           (goto-char (point-max))
+           (insert "]")
+           (goto-char p))
+         (let ((message (car (json-parse-buffer :array-type 'list))))
+           (with-current-buffer "*scratch*"
+             (goto-char (point-max))
+             (let ((p (point)))
+               (insert message)
+               (comment-region p (point)))))
+         (kill-buffer))))))
+
+;; (my/fortune)
+
 (add-to-list 'load-path (expand-file-name "groovy-splash" no-littering-etc-directory))
-(require 'groovy-splash)
-(add-hook 'after-init-hook #'groovy-splash-show)
+(use-package groovy-splash
+  :straight nil
+  :hook (after-init . groovy-splash-show))
 
 (message "Loaded %d sections matching local id \"%s\""
          my/local-config-count *my/local-id*)
