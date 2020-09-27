@@ -978,7 +978,8 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp
      (use-package treemacs-all-the-icons
-       :requires all-the-icons)
+       :requires all-the-icons
+       :config (treemacs-load-theme 'all-the-icons))
    #+END_SRC
 
 ** Git

@@ -343,7 +343,8 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
                (if (> (my/current-default-face-height) 80) 22 11))))
 
 (use-package treemacs-all-the-icons
-  :requires all-the-icons)
+  :requires all-the-icons
+  :config (treemacs-load-theme 'all-the-icons))
 
 (use-package magit
   :bind ("C-x g" . magit-status))
