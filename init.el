@@ -416,6 +416,10 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 (use-package restart-emacs
   :commands restart-emacs)
 
+(use-package company-box
+  :delight
+  :hook (company-mode . company-box-mode))
+
 (use-package lsp-mode
   :hook ((lsp-mode . lsp-enable-which-key-integration))
   :custom

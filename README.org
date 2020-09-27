@@ -1143,6 +1143,17 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
   (Provided that you /are/ working, instead of fussing over your initfiles like me.)
 
+** Prettier Autocomplete
+
+   [[https://github.com/sebastiencs/company-box][company-box]] makes the autocomplete popup a bit prettier, and also causes it to not be
+   a jumbled mess in buffers using variable-pitch fonts.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package company-box
+       :delight
+       :hook (company-mode . company-box-mode))
+   #+END_SRC
+
 * Languages
 ** Common
 
