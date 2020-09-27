@@ -434,6 +434,9 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 (use-package treemacs-evil
   :after (treemacs evil))
 
+(use-package restart-emacs
+  :commands restart-emacs)
+
 (use-package lsp-mode
   :hook ((lsp-mode . lsp-enable-which-key-integration))
   :custom

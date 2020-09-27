@@ -68,6 +68,7 @@
  ("prescient.el" . "0c5d611d9fc6431dd049a71a6eda163c37617a33")
  ("projectile" . "7b6ac286120421216faae43f9e234d801a30ee3d")
  ("rainbow-delimiters" . "f43d48a24602be3ec899345a3326ed0247b960c6")
+ ("restart-emacs" . "9aa90d3df9e08bc420e1c9845ee3ff568e911bd9")
  ("rustic" . "781a2914db5e29823a878533b20f302cdea0e5e4")
  ("s.el" . "43ba8b563bee3426cead0e6d4ddc09398e1a349d")
  ("shrink-path.el" . "c14882c8599aec79a6e8ef2d06454254bb3e1e41")

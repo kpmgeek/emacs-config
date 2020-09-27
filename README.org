@@ -1149,6 +1149,24 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        :after (treemacs evil))
    #+END_SRC
 
+* Extended Enhancements
+
+  Additional enhancements that are less-generally useful. May get moved up to Prelude or
+  Core Enhancements as I see fit.
+
+** Fast Restart
+
+   Botched your Emacs state? Made changes to the init code that require a full restart?
+   Want to spend as little time outside Emacs as possible while restarting? Then just
+   =M-x= [[https://github.com/iqbalansari/restart-emacs][restart-emacs]] and get on with your work.
+
+  #+BEGIN_SRC emacs-lisp
+    (use-package restart-emacs
+      :commands restart-emacs)
+  #+END_SRC
+
+  (Provided that you /are/ working, instead of fussing over your initfiles like me.)
+
 * Languages
 ** Common
 
