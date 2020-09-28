@@ -1711,7 +1711,10 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
                                  groovy-splash-blank-line
                                  groovy-splash-logo
                                  groovy-splash-blank-fill
-                                 groovy-splash-oracle)))
+                                 groovy-splash-recentf
+                                 groovy-splash-blank-fill
+                                 groovy-splash-oracle
+                                 groovy-splash-blank-line)))
    #+END_SRC
 
 * Coda

@@ -1,4 +1,4 @@
-;;; groovy-splash.el --- A groovy Emacs splash screen
+;;; groovy-splash.el --- A groovy Emacs splash screen -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; This used to live in my README.org/init.el, but got big and complicated enough that
@@ -10,6 +10,8 @@
 
 (require 'dash)
 (require 'all-the-icons)
+(require 'page-break-lines)
+(require 'recentf)
 
 (defgroup groovy-splash nil
   "A groovy Emacs splash screen"
@@ -42,6 +44,15 @@ non-nil, don't actually insert the section."
 
   (ignore width height)
   (unless no-draw (insert-char ?\n 1))
+  1)
+
+(defun groovy-splash-rule (width height &optional no-draw)
+  "Insert a horizontal rule.
+Returns the minimum height in lines of the section. WIDTH is the
+buffer width, HEIGHT is the allocated height. If NO-DRAW is
+non-nil, don't actually insert the section."
+  (ignore width height)
+  (unless no-draw (insert "\f\n"))
   1)
 
 (defun groovy-splash-blank-fill (width height &optional no-draw)
@@ -238,6 +249,29 @@ non-nil, don't actually insert the section."
   1)
 
 
+;;; Recent Files Segment
+
+(defcustom groovy-splash-recentf-count 5
+  "Number of recent files to display."
+  :type 'integer
+  :group 'groovy-splash)
+
+(defun groovy-splash-recentf (width height &optional no-draw)
+  "Insert recent files.
+Returns the minimum height in lines of the section. WIDTH is the
+buffer width, HEIGHT is the allocated height. If NO-DRAW is
+non-nil, don't actually insert the section."
+  (ignore width height)
+  (unless no-draw
+    (--each (-take groovy-splash-recentf-count recentf-list)
+      (insert-text-button (abbreviate-file-name it)
+                          'action (lambda (_) (find-file-existing it))
+                          'follow-link t)
+      (groovy-splash--center-line)
+      (insert "\n")))
+  groovy-splash-recentf-count)
+
+
 ;;; Main drawing code
 
 (defcustom groovy-splash-segments
@@ -265,7 +299,7 @@ visible buffer."
         (erase-buffer)
 
         ;; Buffer local settings
-        (setq mode-line-format nil)
+        ;; (setq mode-line-format nil)
         (setq cursor-type nil)
         (setq vertical-scroll-bar nil)
         (setq horizontal-scroll-bar nil)

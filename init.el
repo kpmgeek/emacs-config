@@ -700,7 +700,10 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
                             groovy-splash-blank-line
                             groovy-splash-logo
                             groovy-splash-blank-fill
-                            groovy-splash-oracle)))
+                            groovy-splash-recentf
+                            groovy-splash-blank-fill
+                            groovy-splash-oracle
+                            groovy-splash-blank-line)))
 
 (message "Loaded %d sections matching local id \"%s\""
          my/local-config-count *my/local-id*)
