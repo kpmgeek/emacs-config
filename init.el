@@ -699,7 +699,9 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (groovy-splash-segments '(groovy-splash-groovy-fill
                             groovy-splash-blank-line
                             groovy-splash-logo
-                            groovy-splash-blank-fill
+                            groovy-splash-blank-line
+                            groovy-splash-rule
+                            groovy-splash-blank-line
                             groovy-splash-recentf
                             groovy-splash-blank-fill
                             groovy-splash-oracle

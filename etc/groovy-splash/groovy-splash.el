@@ -5,6 +5,15 @@
 ;; it was worth breaking it out into its own file, if only so that I don't have to
 ;; recompile init.el every time I edit it.
 ;; TODO: better commentary
+;;
+;; Segment functions take one integer parameter, HEIGHT, and behave as follows:
+;;
+;;   - If HEIGHT is nil, just returns a cons of integers (MIN . MAX), where MIN and MAX
+;;     are the minimum and maximum heights in integers. MAX can also be nil, in which
+;;     case there is no maximum height.
+;;
+;;   - If HEIGHT is an integer, draws the segment in that many rows. HEIGHT will be
+;;     within the range returned by the function in a call above.
 
 ;;; Code:
 
@@ -32,108 +41,135 @@
   (end-of-line))
 
 
-;;; Vertical fill segments
-;; These return 0 when asked for their height, and draw themselves at the height
-;; requested by the HEIGHT parameter.
+;;; Spacing segments
 
-(defun groovy-splash-blank-line (width height &optional no-draw)
+(defun groovy-splash-blank-line (&optional height)
   "Insert a blank line.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
 
-  (ignore width height)
-  (unless no-draw (insert-char ?\n 1))
-  1)
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
 
-(defun groovy-splash-rule (width height &optional no-draw)
+  (when height
+    (insert-char ?\n 1))
+  '(1 . 1))
+
+(defun groovy-splash-rule (&optional height)
   "Insert a horizontal rule.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
-  (ignore width height)
-  (unless no-draw (insert "\f\n"))
-  1)
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
 
-(defun groovy-splash-blank-fill (width height &optional no-draw)
+  (when height
+    (insert "\f\n"))
+  '(1 . 1))
+
+(defun groovy-splash-blank-fill (&optional height)
   "Insert blank fill.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
 
-  (ignore width)
-  (unless no-draw (insert-char ?\n height))
-  0)
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
 
-(defun groovy-splash-groovy-fill (width height &optional no-draw)
+  (when height
+    (insert-char ?\n height))
+
+  ;; Always inserts at least one blank line so that this can be used do divide sections.
+  '(1 . nil))
+
+(defcustom groovy-splash-groovy-fill-min 3
+  "Minimum height of groovy fill."
+  :type 'integer
+  :group 'groovy-splash)
+
+(defcustom groovy-splash-groovy-colors
+  '("#fb4934" "#fabd2f" "#b8bb26" "#83a598" "#d3869b")
+  "Colors to use for the groovy fill."
+  :type '(repeat color)
+  :group 'groovy-splash)
+
+(defcustom groovy-splash-groovy-stripe-chars
+  "\N{FULL BLOCK}\N{FULL BLOCK}"
+  "Characters for one stripe in one row of the groovy fill."
+  :type 'string
+  :group 'groovy-splash)
+
+(defun groovy-splash-groovy-fill (&optional height)
   "Insert groovy rainbow fill.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
 
-  (ignore width)
-  (unless no-draw
-    (-dotimes height
-      (lambda (_)
-        (insert (mapconcat (lambda (color)
-                             (propertize "\N{FULL BLOCK}\N{FULL BLOCK}"
-                                         'face `(:foreground ,color :background ,color)))
-                           '("#fb4934" "#fabd2f" "#b8bb26" "#83a598" "#d3869b")
-                           ""))
-        (groovy-splash--center-line) (insert "\n"))))
-  0)
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
+
+  (when height
+    (--dotimes height
+      (insert (mapconcat (lambda (color)
+                           (propertize groovy-splash-groovy-stripe-chars
+                                       'face `(:foreground ,color)))
+                         groovy-splash-groovy-colors ""))
+      (groovy-splash--center-line) (insert "\n")))
+  `(,groovy-splash-groovy-fill-min . nil))
 
 
 ;;; Banner segments
 
-(defun groovy-splash-logo (width height &optional no-draw)
-  "Insert logo and version into buffer.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
+(defcustom groovy-splash-banner-max-height 12
+  "Maximum height of any banners in lines."
+  :type 'integer
+  :group 'groovy-splash)
 
-  (ignore width height)
-  (let ((icon-height 10))
-    (unless no-draw
+(defun groovy-splash--line-pixel-height ()
+  "Calculate the pixel height of the line at point in the current buffer.
+
+Point should be at the end of the line."
+
+  ;; Why not line-pixel-height? That calculates the height of the line at point in the
+  ;; currently-selected *window*, which is not what we want.
+  (cdr (window-text-pixel-size (get-buffer-window)
+                               (line-beginning-position) (point))))
+
+(defun groovy-splash-logo (&optional height)
+  "Insert logo and version into buffer.
+
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
+
+  (when height
+    ;; Draw on line line if the icon would be too small.
+    (let* ((one-line-p (< height 5))
+           (icon-height (- height (if one-line-p 0 2))))
+
       ;; This is a little tricky because we want to specify the height in lines, but the
-      ;; icon will make the line a little too big. So what we do is insert it, measure
-      ;; it, then adjust the size.
-      (insert " ")                    ; extra space to calculate line height
-      (-let [(_ . base-px-height)
-             (window-text-pixel-size (get-buffer-window)
-                                     (line-beginning-position) (point))]
-        (insert (all-the-icons-fileicon "emacs"
-                                        :height icon-height
-                                        :v-adjust 0))
-        (-let* (((_ .  initial-px-height)
-                 (window-text-pixel-size (get-buffer-window)
-                                         (line-beginning-position) (point)))
-                (px-height (* icon-height base-px-height))
-                (new-height (/ (* (float icon-height) px-height) initial-px-height)))
+      ;; font-icons tend to be a little taller than a usual line. We get around this by
+      ;; inserting it, measuring it, then using that to refine the size.
+      (insert " ")                 ; space so that we can calculate the base line-height
+      (let ((base-px-height (groovy-splash--line-pixel-height)))
+        (insert (all-the-icons-fileicon "emacs" :height icon-height :v-adjust 0))
+        (let* ((initial-px-height (groovy-splash--line-pixel-height))
+               (px-height (* icon-height base-px-height))
+               (new-height (/ (* (float icon-height) px-height) initial-px-height)))
           (delete-char -2)
           (insert (all-the-icons-fileicon "emacs"
                                           :height new-height
-                                          :v-adjust 0
+                                          :v-adjust (if one-line-p nil 0)
                                           :face 'all-the-icons-purple))))
+      (if one-line-p
+          (insert " ")
+        (groovy-splash--center-line)
+        (insert "\n\n"))
+      (insert (concat (propertize "GNU Emacs" 'face 'bold)
+                      " "
+                      (format "%d.%d" emacs-major-version emacs-minor-version)))
       (groovy-splash--center-line)
-      (insert (concat
-               "\n\n"
-               (propertize "GNU Emacs" 'face 'bold)
-               " "
-               (format "%d.%d" emacs-major-version emacs-minor-version)))
-      (groovy-splash--center-line) (insert "\n"))
-    (+ icon-height 2)))
+      (insert "\n")))
+  `(2 . ,(max 1 groovy-splash-banner-max-height)))
 
 
 ;;; Button segments
 
-(defun groovy-splash-recover-session-button (width height &optional no-draw)
+(defun groovy-splash-recover-session-button (&optional height)
   "Insert a button to recover the last session.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
-  (ignore width height)
-  (unless no-draw
+
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
+
+  (when height
     (when (and auto-save-list-file-prefix
                (let ((auto-save-dir (file-name-directory auto-save-list-file-prefix)))
                  (and (file-directory-p auto-save-dir)
@@ -145,7 +181,7 @@ non-nil, don't actually insert the section."
                           'follow-link t)
       (groovy-splash--center-line))
     (insert "\n"))
-  1)
+  '(1 . 1))
 
 
 ;;; Oracle segment
@@ -211,10 +247,16 @@ non-nil, don't actually insert the section."
   :type '(repeat string)
   :group 'groovy-splash)
 
+(defcustom groovy-splash-oracle-brackets '("➑ " . " ➑")
+  "Brackets with which to surround oracle text."
+  :type '(cons string string)
+  :group 'groovy-splash)
+
 (defvar groovy-splash--oracle-current-phrase nil)
 
 (defun groovy-splash--oracle-phrase ()
   "Get the current oracle phrase.
+
 If one hasn't been picked yet, pick one."
   (or groovy-splash--oracle-current-phrase
       (groovy-splash--refresh-oracle)))
@@ -224,52 +266,54 @@ If one hasn't been picked yet, pick one."
   (setq groovy-splash--oracle-current-phrase
         (nth (random (length groovy-splash-oracle-phrases)) groovy-splash-oracle-phrases)))
 
-(defun groovy-splash-oracle (width height &optional no-draw)
-  "Insert a magic 8 ball phrase.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
-  (ignore width height)
+(defun groovy-splash-oracle (&optional height)
+  "Insert a mystic oracle.
 
-  (unless no-draw
-    (let ((eight (propertize "➑" 'face 'default)))
-      (insert-text-button
-       (format "%s %s %s"
-               eight
-               (propertize (groovy-splash--oracle-phrase)
-                           'face '(:foreground "#83a598"))
-               eight)
-       'action (lambda (_)
-                 (groovy-splash--refresh-oracle)
-                 (groovy-splash--redraw))
-       'help-echo "Ask the mystic oracle another question"
-       ;; 'face 'warning
-       'follow-link t))
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
+
+  (when height
+    (insert-text-button
+     (concat (propertize (car groovy-splash-oracle-brackets)
+                         'face 'default)
+             (groovy-splash--oracle-phrase)
+             (propertize (cdr groovy-splash-oracle-brackets)
+                         'face 'default))
+     'action (lambda (_)
+               (groovy-splash--refresh-oracle)
+               (groovy-splash--redraw))
+     'help-echo "Ask the mystic oracle another question"
+     'follow-link t)
     (groovy-splash--center-line) (insert "\n"))
-  1)
+  '(1 . 1))
 
 
 ;;; Recent Files Segment
 
-(defcustom groovy-splash-recentf-count 5
-  "Number of recent files to display."
-  :type 'integer
+(defcustom groovy-splash-recentf-max-count 5
+  "Maximum number of recent files to display."
+  :type '(choice (const :tag "None" nil)
+                 integer)
   :group 'groovy-splash)
 
-(defun groovy-splash-recentf (width height &optional no-draw)
-  "Insert recent files.
-Returns the minimum height in lines of the section. WIDTH is the
-buffer width, HEIGHT is the allocated height. If NO-DRAW is
-non-nil, don't actually insert the section."
-  (ignore width height)
-  (unless no-draw
-    (--each (-take groovy-splash-recentf-count recentf-list)
-      (insert-text-button (abbreviate-file-name it)
-                          'action (lambda (_) (find-file-existing it))
-                          'follow-link t)
-      (groovy-splash--center-line)
-      (insert "\n")))
-  groovy-splash-recentf-count)
+(defun groovy-splash-recentf (&optional height)
+  "Insert list of recent files.
+
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
+
+  (when height
+    (let ((entries (-take height recentf-list)))
+      (--each entries
+        (insert-text-button (abbreviate-file-name it)
+                            'action (lambda (_) (find-file-existing it))
+                            'follow-link t)
+        (groovy-splash--center-line) (insert "\n"))
+      (--dotimes (- height (length entries))
+        (insert "\n"))))
+  (if groovy-splash-recentf-max-count
+      `(0 . ,(min groovy-splash-recentf-max-count (length recentf-list)))
+    `(0 . nil)))
 
 
 ;;; Main drawing code
@@ -289,6 +333,7 @@ non-nil, don't actually insert the section."
 
 (defun groovy-splash--redraw (&optional force)
   "Redraw the splash screen.
+
 If FORCE is non-nil, redraw the screen even if it isn't in a
 visible buffer."
   (let* ((splash-buffer (get-buffer-create "*groovy-splash*"))
@@ -304,32 +349,83 @@ visible buffer."
         (setq vertical-scroll-bar nil)
         (setq horizontal-scroll-bar nil)
         (face-remap-add-relative 'link :underline nil)
+        (page-break-lines-mode +1)
 
         (let* ((height (window-body-height splash-window))
-               (width (window-body-width splash-window))
-
-               ;; Measure the section heights
-               (startup-items
+               (splash-segments
                 (--map-when (not (functionp it))
-                            (lambda (_0 _1 &optional no-draw)
-                              (unless no-draw
+                            (lambda (&optional h)
+                              (when h
                                 (insert it)
                                 (groovy-splash--center-line) (insert "\n"))
-                              1)
+                              '(1 . 1))
                             groovy-splash-segments))
-               (section-heights (--map (funcall it width height t) startup-items))
-               (fill-section-count (-count 'zerop section-heights))
-               (leftover-height (- height (-sum section-heights)))
-               (usual-fill-height (/ leftover-height fill-section-count))
-               (final-fill-height (- leftover-height (* usual-fill-height
-                                                        (1- fill-section-count)))))
-          (setq fill-column width)
-          (->> (-replace-last 0 final-fill-height section-heights)
-               (-replace 0 usual-fill-height)
-               (--zip-with (funcall it width other) startup-items)))
+
+               ;; Measure the segment heights
+               (segment-heights (-map 'funcall splash-segments))
+               (min-height (-sum (-map 'car segment-heights)))
+               (preferred-height (-sum (--map (or (cdr it) (car it)) segment-heights))))
+          (->> (cond ((<= height min-height)
+                      (groovy-splash--min-height-layout height segment-heights))
+                     ((< height preferred-height)
+                      (groovy-splash--height-stealing-layout height segment-heights))
+                     (t
+                      (groovy-splash--height-sharing-layout height segment-heights)))
+               (--zip-with (funcall it other) splash-segments)))
 
         (goto-char 0)
         (read-only-mode +1)))))
+
+(defun groovy-splash--min-height-layout (height segment-heights)
+  "Give every segment its minimum height.
+
+Layouts select values for each range in SEGMENT-HEIGHTS so that
+they sum to HEIGHT. This layout is allowed to cheat at that and
+return a set of heights that is too tall if necessary."
+  (ignore height)
+  (-map 'car segment-heights))
+
+(defun groovy-splash--height-stealing-layout (height segment-heights)
+  "Give every segment its preferred height, then steal the deficit.
+
+Layouts select values for each range in SEGMENT-HEIGHTS so that
+they sum to HEIGHT. This layout accomplishes that by giving
+everything its preferred height (the max if it has one, min
+otherwise) and then stealing as much height as it can from each
+segment starting from the first until they all fit."
+
+  (let* ((bounded-heights (--map-when (null (cdr it)) (cons (car it) (car it))
+                                      segment-heights))
+         (preferred-height (-sum (-map 'cdr bounded-heights)))
+         (height-deficit (- preferred-height height)))
+
+    (->> bounded-heights
+         (--map-when (and (< 0 height-deficit)  (< (car it) (cdr it)))
+                     (let ((theft (min height-deficit (- (cdr it) (car it)))))
+                       (setq height-deficit (- height-deficit theft))
+                       (cons (car it) (- (cdr it) theft))))
+         (-map 'cdr))))
+
+(defun groovy-splash--height-sharing-layout (height segment-heights)
+  "Give every segment its preferred height, then share the surplus.
+
+Layouts select values for each range in SEGMENT-HEIGHTS so that
+they sum to HEIGHT. This layout accomplishes that by giving
+everything its preferred height (the max if it has one, min
+otherwise) and then sharing height equally between the segments
+with no maximum height."
+
+  ;; This shares the extra equally, so we can have nice things like centering.
+
+  (let* ((preferred-height (-sum (--map (or (cdr it) (car it)) segment-heights)))
+         (stretchy-count (-count 'null (-map 'cdr segment-heights)))
+         (surplus-height (- height preferred-height))
+         (usual-share (/ surplus-height stretchy-count))
+         (final-share (- surplus-height (* usual-share (1- stretchy-count)))))
+    (->> segment-heights
+         (--map-last (null (cdr it)) (cons (car it) (+ (car it) final-share)))
+         (--map-when (null (cdr it)) (cons (car it) (+ (car it) usual-share)))
+         (-map 'cdr))))
 
 (defun groovy-splash-show ()
   "Show the splash screen."
