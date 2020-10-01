@@ -122,8 +122,16 @@
 
 (global-set-key (kbd "M-/") 'hippie-expand)
 
-(add-hook 'text-mode-hook #'flyspell-mode)
-(add-hook 'prog-mode-hook #'flyspell-prog-mode)
+(use-package ispell
+  :defer t
+  :custom
+  (ispell-program-name (if *my/is-winnt* "hunspell" "aspell"))
+  (ispell-dictionary "en_US"))
+
+(use-package flyspell
+  :delight (flyspell-mode " ~")
+  :hook ((text-mode . flyspell-mode)
+         (prog-mode . flyspell-prog-mode)))
 
 (add-hook 'after-init-hook #'server-start)
 

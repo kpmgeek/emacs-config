@@ -464,12 +464,24 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
 ** Spell-Checking
 
-   Enable spell-checking in buffers. It's probably worth setting =ispell-program-name= as
-   appropriate for your machine as well.
+   Emacs has a built-in spellchecker, [[https://www.emacswiki.org/emacs/FlySpell][Flyspell]], which works by shelling out to another
+   program, such as Ispell, Aspell, or Hunspell. If you're on Windows, you're currently
+   pretty much stuck with the old version of Hunspell from EZWinPorts. If you find
+   something better, please let me know. If you're on Linux or macOS, my understanding
+   is that GNU Aspell is faster, but Hunspell has better language support; you should be
+   able to get either through your package manager.
 
    #+BEGIN_SRC emacs-lisp
-     (add-hook 'text-mode-hook #'flyspell-mode)
-     (add-hook 'prog-mode-hook #'flyspell-prog-mode)
+     (use-package ispell
+       :defer t
+       :custom
+       (ispell-program-name (if *my/is-winnt* "hunspell" "aspell"))
+       (ispell-dictionary "en_US"))
+
+     (use-package flyspell
+       :delight (flyspell-mode " ~")
+       :hook ((text-mode . flyspell-mode)
+              (prog-mode . flyspell-prog-mode)))
    #+END_SRC
 
 ** Emacs Server
