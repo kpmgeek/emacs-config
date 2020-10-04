@@ -601,7 +601,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
                                  `([,(regexp-opt comps) 0 font-shape-gstring])))))
    #+END_SRC
 
-   All that remains is the pass in the strings that should become ligatures.
+   All that remains is to pass in the strings that should become ligatures.
 
    #+BEGIN_SRC emacs-lisp
      (defvar my/compositions
@@ -614,7 +614,8 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
          "~~" "~>" "~~>"
          "|>" "||>" "|||>" "||"
          "::" "&&"
-         "//" "/*" "/**/"
+         ;; "//"  ;; c++-mode hangs when this is enabled???
+         "/*" "/**/"
          "*/"))
      (my/enable-compositions my/compositions)
    #+END_SRC
