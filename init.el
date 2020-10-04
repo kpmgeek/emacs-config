@@ -238,7 +238,8 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (use-package smartparens
   :delight (smartparens-mode " ()")
-  :hook (prog-mode . smartparens-strict-mode)
+  :hook ((prog-mode . smartparens-mode)
+         (emacs-lisp-mode . smartparens-strict-mode))
   :config
   (require 'smartparens-config))
 

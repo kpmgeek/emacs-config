@@ -780,7 +780,8 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    #+BEGIN_SRC emacs-lisp
      (use-package smartparens
        :delight (smartparens-mode " ()")
-       :hook (prog-mode . smartparens-strict-mode)
+       :hook ((prog-mode . smartparens-mode)
+              (emacs-lisp-mode . smartparens-strict-mode))
        :config
        (require 'smartparens-config))
    #+END_SRC
