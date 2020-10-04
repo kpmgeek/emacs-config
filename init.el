@@ -329,7 +329,7 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (aw-display-mode-overlay nil)
   (aw-dispatch-always t)
   (aw-background nil)
-  :bind ("M-o" . ace-window)
+  :bind ("C-x o" . ace-window)
   :config (ace-window-display-mode +1))
 
 (use-package treemacs
