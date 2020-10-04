@@ -463,6 +463,12 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (delight 'eldoc-mode nil t)
 
+(defun my/indent-setup ()
+  (c-set-offset 'arglist-intro '+))
+
+(add-hook 'c-mode-hook #'my/indent-setup)
+(add-hook 'c++-mode-hook #'my/indent-setup)
+
 (use-package irony
   :hook (((c++-mode c-mode objc-mode) . irony-mode)
          (irony-mode . irony-cdb-autosetup-compile-options))
@@ -475,6 +481,16 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
       (setq w32-pipe-read-delay 0))
     (when (boundp 'w32-pipe-buffer-size)
       (setq irony-server-w32-pipe-buffer-size (* 64 1024)))))
+
+(use-package flycheck-irony
+  :hook ((flycheck-mode . flycheck-irony-setup)))
+
+(use-package company-irony
+  :config
+  (add-to-list 'company-backends 'company-irony))
+
+(use-package irony-eldoc
+  :hook ((irony-mode . irony-eldoc)))
 
 (use-package cuda-mode
   :mode (("\\.cu\\'" . cuda-mode)

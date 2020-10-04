@@ -1225,6 +1225,12 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    libclang to improve the experience.
 
    #+BEGIN_SRC emacs-lisp
+     (defun my/indent-setup ()
+       (c-set-offset 'arglist-intro '+))
+
+     (add-hook 'c-mode-hook #'my/indent-setup)
+     (add-hook 'c++-mode-hook #'my/indent-setup)
+
      (use-package irony
        :hook (((c++-mode c-mode objc-mode) . irony-mode)
               (irony-mode . irony-cdb-autosetup-compile-options))
@@ -1237,6 +1243,16 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
            (setq w32-pipe-read-delay 0))
          (when (boundp 'w32-pipe-buffer-size)
            (setq irony-server-w32-pipe-buffer-size (* 64 1024)))))
+
+     (use-package flycheck-irony
+       :hook ((flycheck-mode . flycheck-irony-setup)))
+
+     (use-package company-irony
+       :config
+       (add-to-list 'company-backends 'company-irony))
+
+     (use-package irony-eldoc
+       :hook ((irony-mode . irony-eldoc)))
    #+END_SRC
 
    In theory [[https://github.com/atilaneves/cmake-ide][cmake-ide]] should provide a bunch of bells and whistles, but the
