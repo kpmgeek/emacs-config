@@ -310,6 +310,8 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :delight (projectile-mode
             (:eval (format " p:%s" (projectile-project-type))))
   :bind-keymap ("C-c p" . projectile-command-map)
+  :bind (("<f7>" . projectile-compile-project)
+         ("<f5>" . projectile-run-project))
   :custom
   (projectile-completion-system 'ivy)
   :config (projectile-discover-projects-in-search-path))
