@@ -1187,6 +1187,27 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
        :hook (company-mode . company-box-mode))
    #+END_SRC
 
+** Window Management II
+
+   The [[https://github.com/bmag/emacs-purpose][window-purpose]] package allows windows to be "dedicated" to buffers with a
+   particular purpose. Handy if you want to avoid your compilation buffer leaping around
+   taking over windows.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package window-purpose
+       :bind (:map purpose-mode-map
+                   ("C-x b" . nil)
+                   ("C-x C-f" . nil))
+       :config
+       (purpose-mode +1)
+       (require 'window-purpose-x)
+       (purpose-x-magit-single-on))
+   #+END_SRC
+
+   The =C-x b= and =C-x C-f= bindings override the ones from Counsel, so those are unmapped
+   as suggested for if you're using Helm. I'm not sure that the =window-purpose= versions
+   get you, but it seems to work fine for now.
+
 * Languages
 ** Common
 

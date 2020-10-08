@@ -449,6 +449,15 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :delight
   :hook (company-mode . company-box-mode))
 
+(use-package window-purpose
+  :bind (:map purpose-mode-map
+              ("C-x b" . nil)
+              ("C-x C-f" . nil))
+  :config
+  (purpose-mode +1)
+  (require 'window-purpose-x)
+  (purpose-x-magit-single-on))
+
 (use-package lsp-mode
   :hook ((lsp-mode . lsp-enable-which-key-integration))
   :custom
