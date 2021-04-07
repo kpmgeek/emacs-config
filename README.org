@@ -572,7 +572,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp :tangle early-init.el
      (add-to-list 'default-frame-alist
-                  '(font . "Fantasque Sans Mono-10"))
+                  '(font . "Fantasque Sans Mono-12"))
 
      (set-face-attribute 'variable-pitch nil
                          :family "Source Serif Pro"
@@ -1215,7 +1215,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    [[https://github.com/emacs-lsp/lsp-mode/][lsp-mode]] allows us to take advantage of these. The language-specific configurations
    are grouped under the relevant headers, including the hooks.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package lsp-mode
        :hook ((lsp-mode . lsp-enable-which-key-integration))
        :custom
@@ -1287,7 +1287,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
     A simple [[https://github.com/chachi/cuda-mode][cuda-mode]] which provides font-lock features. Could get most of the way
     there by just adding entries for =c++-mode= to =auto-mode-alist=.
 
-    #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC emacs-lisp :tangle no
       (use-package cuda-mode
         :mode (("\\.cu\\'" . cuda-mode)
                ("\\.cuh\\'" . cuda-mode)))
@@ -1326,7 +1326,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    intolerably slow; I understand that using LSP with [[https://github.com/golang/tools/blob/master/gopls/README.md][gopls]] is now the preferred option.
    I haven't done much Go lately so this will sit around as-is until I need it again.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      ;; (use-package company-go)
      (use-package go-mode
        :mode ("\\.go\\'". go-mode)
@@ -1345,7 +1345,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    [[https://immerrr.github.io/lua-mode/][lua-mode]] for writing Lua.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package lua-mode
        :commands (lua-mode)
        :mode ("\\.lua\\'" . lua-mode)
@@ -1439,7 +1439,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    also move my campaign notes out a crappy notepad file now that I have Emacs starting
    up faster.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package org-d20
        :commands org-d20-mode)
    #+END_SRC
@@ -1478,7 +1478,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    [[https://github.com/ocaml/tuareg][Tuareg]]
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package tuareg
        :mode (("\\.ml[ily]?$" . tuareg-mode)
               ("\\.topml$" . tuareg-mode))
@@ -1494,7 +1494,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    [[https://github.com/ocaml/merlin][Merlin]]
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package merlin
        :delight (merlin-mode " ⚗")
        :hook (tuareg-mode . merlin-mode)
@@ -1505,14 +1505,14 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    [[https://github.com/OCamlPro/ocp-indent][ocp-indent]]
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package ocp-indent
        :hook (tuareg-mode . ocp-indent-caml-mode-setup))
    #+END_SRC
 
    ... this should probably be up there in the Tuareg block.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (with-eval-after-load 'smartparens
        (sp-local-pair 'tuareg-mode "'" nil :actions nil)
        (sp-local-pair 'tuareg-mode "`" nil :actions nil))
@@ -1520,7 +1520,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    Setup for an inferior [[https://github.com/ocaml-community/utop][utop]].
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package utop
        :delight (utop-minor-mode " ū")
        :hook (tuareg-mode . utop-minor-mode)
@@ -1533,7 +1533,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    [[https://github.com/flycheck/flycheck-ocaml][flycheck-ocaml]]
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package flycheck-ocaml
        :after (flycheck merlin)
        :config
@@ -1544,7 +1544,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    Syntax highlighting and Projectile project type for [[https://github.com/ocaml/dune/tree/master/editor-integration/emacs][dune]].
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package dune
        :mode ("\\(?:\\`\\|/\\)dune\\(?:\\.inc\\)?\\'" . dune-mode)
        :commands (dune-promote dune-runtest-and-promote)
@@ -1562,7 +1562,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    extend that a bit. (There are many other Python modes, such as Elpy, but I jump
    between languages enough that I'm beginning to value consistency a bit.)
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package lsp-python-ms
        :defer t
        :custom
@@ -1575,7 +1575,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    Automatically format Python code on save using the Black formatter.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package blacken
        :delight blacken-mode
        :hook (python-mode . blacken-mode))
@@ -1585,9 +1585,25 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    There are multiple Rust modes, and I settled on [[https://github.com/brotzeit/rustic][Rustic]] for undocumented reasons.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package rustic
        :mode ("\\.rs\\'" . rustic-mode))
+   #+END_SRC
+
+** Scheme
+
+   Geiser, for great justice.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package geiser
+       :custom
+       (geiser-chicken-binary "/usr/local/bin/csi5"))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+     (add-to-list 'load-path (expand-file-name "chicken" no-littering-etc-directory))
+     (use-package chicken
+       :straight nil)
    #+END_SRC
 
 ** TODO TeX
@@ -1595,7 +1611,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    So there's a built-in TeX mode, or we can add [[https://www.gnu.org/software/auctex/][AUCTeX]]. Right now this assumes we're on
    Windows, using [[https://www.sumatrapdfreader.org/free-pdf-reader.html][Sumatra PDF]] as a viewer.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package tex-site
        :straight auctex
        :mode ("\\.tex\\'" . TeX-latex-mode)
@@ -1617,7 +1633,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    [[https://github.com/ziglang/zig-mode][zig-mode]] for syntax highlighting and auto-indentation.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (use-package zig-mode
        :commands (zig-mode)
        :hook (zig-mode . lsp)
@@ -1626,7 +1642,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    Projectile integration.
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
      (with-eval-after-load 'projectile
        (projectile-register-project-type
         'zig '("build.zig")
@@ -1678,6 +1694,14 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp
      (my/config-for-local-id "ancalagon.gnu/linux"
+       (setq projectile-project-search-path '("~/src"))
+       (setq treemacs-python-executable (executable-find "python3")))
+   #+END_SRC
+
+** Caladbolg
+
+   #+BEGIN_SRC emacs-lisp
+     (my/config-for-local-id "caladbolg.berkeley-unix"
        (setq projectile-project-search-path '("~/src"))
        (setq treemacs-python-executable (executable-find "python3")))
    #+END_SRC

@@ -58,7 +58,7 @@
 (add-to-list 'default-frame-alist '(height . 50))
 
 (add-to-list 'default-frame-alist
-             '(font . "Fantasque Sans Mono-10"))
+             '(font . "Fantasque Sans Mono-12"))
 
 (set-face-attribute 'variable-pitch nil
                     :family "Source Serif Pro"

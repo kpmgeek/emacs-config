@@ -458,21 +458,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (require 'window-purpose-x)
   (purpose-x-magit-single-on))
 
-(use-package lsp-mode
-  :hook ((lsp-mode . lsp-enable-which-key-integration))
-  :custom
-  (lsp-keymap-prefix "C-l")
-  :commands lsp)
-
-(use-package lsp-ui
-  :commands lsp-ui-mode)
-
-(use-package lsp-ivy  ; ivy integration
-  :commands lsp-ivy-workspace-symbol)
-
-(use-package lsp-treemacs  ; treemacs integration
-  :commands lsp-treemacs-errors-list)
-
 (delight 'eldoc-mode nil t)
 
 (defun my/indent-setup ()
@@ -504,34 +489,12 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 (use-package irony-eldoc
   :hook ((irony-mode . irony-eldoc)))
 
-(use-package cuda-mode
-  :mode (("\\.cu\\'" . cuda-mode)
-         ("\\.cuh\\'" . cuda-mode)))
-
 (use-package fish-mode
   :hook (fish-mode . (lambda ()
                        (add-hook 'before-save-hook 'fish_indent-before-save)))
   :mode (("\\.fish\\'" . fish-mode)
          ("/fish_funced\\..*\\'" . fish-mode))
   :interpreter ("fish" . fish-mode))
-
-;; (use-package company-go)
-(use-package go-mode
-  :mode ("\\.go\\'". go-mode)
-  :init
-  (progn
-    (defun my/go-mode-locals ()
-      ;; (set (make-local-variable 'company-backends) '(company-go))
-      ;; (company-mode 1)
-      (setq tab-width 3))
-    (add-hook 'go-mode-hook #'my/go-mode-locals)
-    (add-hook 'go-mode-hook #'flycheck-mode)
-    (add-hook 'before-save-hook #'gofmt-before-save)))
-
-(use-package lua-mode
-  :commands (lua-mode)
-  :mode ("\\.lua\\'" . lua-mode)
-  :interpreter ("lua" . lua-mode))
 
 (use-package markdown-mode
   :mode (("README\\.md\\'" . gfm-mode)
@@ -573,103 +536,13 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (set-face-attribute 'org-level-7 nil :height (+ 1.0 (expt 0.5 6)))
   (set-face-attribute 'org-level-8 nil :height (+ 1.0 (expt 0.5 7))))
 
-(use-package org-d20
-  :commands org-d20-mode)
-
-(use-package tuareg
-  :mode (("\\.ml[ily]?$" . tuareg-mode)
-         ("\\.topml$" . tuareg-mode))
-  :init
-  (progn
-    ;; (my/ocaml/init-opam)
-    (add-hook 'tuareg-mode-hook 'company-mode)
-    (add-hook 'tuareg-mode-hook 'flycheck-mode)
-    (dolist (ext '(".cmo" ".cmx" ".cma" ".cmxa" ".cmi" ".cmxs" ".cmt"
-                   ".cmti" ".annot"))
-      (add-to-list 'completion-ignored-extensions ext))))
-
-(use-package merlin
-  :delight (merlin-mode " ⚗")
-  :hook (tuareg-mode . merlin-mode)
-  :init
-  (progn
-    (add-to-list 'company-backends 'merlin-company-backend)))
-
-(use-package ocp-indent
-  :hook (tuareg-mode . ocp-indent-caml-mode-setup))
-
-(with-eval-after-load 'smartparens
-  (sp-local-pair 'tuareg-mode "'" nil :actions nil)
-  (sp-local-pair 'tuareg-mode "`" nil :actions nil))
-
-(use-package utop
-  :delight (utop-minor-mode " ū")
-  :hook (tuareg-mode . utop-minor-mode)
-  :config
-  (progn
-    (if (executable-find "opam")
-        (setq utop-command "opam config exec -- utop -emacs")
-      (message "warning: cannot find `opam' executable."))))
-
-(use-package flycheck-ocaml
-  :after (flycheck merlin)
-  :config
-  (progn
-    (setq merlin-error-after-save nil)
-    (flycheck-ocaml-setup)))
-
-(use-package dune
-  :mode ("\\(?:\\`\\|/\\)dune\\(?:\\.inc\\)?\\'" . dune-mode)
-  :commands (dune-promote dune-runtest-and-promote)
-  :after projectile
-  :init
-  (projectile-register-project-type
-   'dune '("dune-project")
-   :compile "dune build"
-   :test "dune runtest"))
-
-(use-package lsp-python-ms
-  :defer t
+(use-package geiser
   :custom
-  (lsp-python-ms-auto-install-server t)
-  (lsp-python-ms-executable (executable-find "Microsoft.Python.LanguageServer"))
-  :hook (python-mode . (lambda ()
-                         (require 'lsp-python-ms)
-                         (lsp))))
+  (geiser-chicken-binary "/usr/local/bin/csi5"))
 
-(use-package blacken
-  :delight blacken-mode
-  :hook (python-mode . blacken-mode))
-
-(use-package rustic
-  :mode ("\\.rs\\'" . rustic-mode))
-
-(use-package tex-site
-  :straight auctex
-  :mode ("\\.tex\\'" . TeX-latex-mode)
-  :custom
-  (TeX-parse-self t) ; Enable parse on load.
-  (TeX-auto-save t) ; Enable parse on save.
-  (TeX-view-program-list
-   '(("SumatraPDF"
-      ("SumatraPDF.exe -reuse-instance"
-       (mode-io-correlate " -forward-search \"%b\" %n")
-       " %o")
-      "SumatraPDF")))
-  (TeX-view-program-selection '((output-pdf "SumatraPDF")))
-  (TeX-source-correlate-mode t)
-  (TeX-source-correlate-method 'synctex))
-
-(use-package zig-mode
-  :commands (zig-mode)
-  :hook (zig-mode . lsp)
-  :mode ("\\.zig\\'" . zig-mode))
-
-(with-eval-after-load 'projectile
-  (projectile-register-project-type
-   'zig '("build.zig")
-   :compile "zig build"
-   :test "zig build"))
+(add-to-list 'load-path (expand-file-name "chicken" no-littering-etc-directory))
+(use-package chicken
+  :straight nil)
 
 (defconst *my/local-id*
   (format "%s.%s" (downcase (system-name)) system-type)
@@ -686,6 +559,10 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
      ,@body))
 
 (my/config-for-local-id "ancalagon.gnu/linux"
+  (setq projectile-project-search-path '("~/src"))
+  (setq treemacs-python-executable (executable-find "python3")))
+
+(my/config-for-local-id "caladbolg.berkeley-unix"
   (setq projectile-project-search-path '("~/src"))
   (setq treemacs-python-executable (executable-find "python3")))
 
