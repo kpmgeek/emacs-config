@@ -158,7 +158,7 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (global-set-key (kbd "C-x t s") 'my/toggle-face-height)
 
-(use-package dash :config (dash-enable-font-lock))
+(use-package dash :config (global-dash-fontify-mode))
 
 (defun my/enable-compositions (ligatures)
   "Set up the `composition-function-table' for a list of LIGATURES."
@@ -536,9 +536,8 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (set-face-attribute 'org-level-7 nil :height (+ 1.0 (expt 0.5 6)))
   (set-face-attribute 'org-level-8 nil :height (+ 1.0 (expt 0.5 7))))
 
-(use-package geiser
-  :custom
-  (geiser-chicken-binary "/usr/local/bin/csi5"))
+(use-package geiser)
+(use-package geiser-chicken)
 
 (add-to-list 'load-path (expand-file-name "chicken" no-littering-etc-directory))
 (use-package chicken

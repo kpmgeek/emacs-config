@@ -553,7 +553,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    anyway, so it might as well get included explicitly so that it can be used here.
 
    #+BEGIN_SRC emacs-lisp
-     (use-package dash :config (dash-enable-font-lock))
+     (use-package dash :config (global-dash-fontify-mode))
    #+END_SRC
 
 ** Initial Frame Size
@@ -1595,9 +1595,8 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    Geiser, for great justice.
 
    #+BEGIN_SRC emacs-lisp
-     (use-package geiser
-       :custom
-       (geiser-chicken-binary "/usr/local/bin/csi5"))
+     (use-package geiser)
+     (use-package geiser-chicken)
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
