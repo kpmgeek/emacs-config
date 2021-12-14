@@ -435,6 +435,11 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (require 'window-purpose-x)
   (purpose-x-magit-single-on))
 
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode +1))
+
 (delight 'eldoc-mode nil t)
 
 (defun my/indent-setup ()

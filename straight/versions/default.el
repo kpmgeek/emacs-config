@@ -15,6 +15,7 @@
  ("delight" . "70cb8cec9e5eb2c24364e065d85c2ea8f14a587c")
  ("dhall-mode" . "ad259c8a2292fb398dff1ce7d25c686edb02945d")
  ("doom-modeline" . "69ede7d719764f26671897c5020f295e5eb1e6c8")
+ ("editorconfig-emacs" . "2ab86dc9a8ed7a669ca348252d4af46522b5c411")
  ("el-get" . "960f3fb962c35d3196bab20b2a3f6d6228119277")
  ("elisp" . "8a3b529d5ece261a8847298ea03ed35615cc9bfa")
  ("emacs-fish" . "a7c953b1491ac3a3e00a7b560f2c9f46b3cb5c04")

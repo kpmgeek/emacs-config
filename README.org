@@ -1228,6 +1228,17 @@ those are unmapped as suggested for if you're using Helm. I'm not sure
 that the =window-purpose= versions get you, but it seems to work fine
 for now.
 
+** EditorConfig
+
+Provides support for [[https://editorconfig.org/][EditorConfig]] files.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package editorconfig
+    :ensure t
+    :config
+    (editorconfig-mode +1))
+#+END_SRC
+
 * Languages
 ** Common
 
