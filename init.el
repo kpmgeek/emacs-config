@@ -426,8 +426,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :delight evil-cleverparens-mode
   :hook (lisp-mode . evil-cleverparens-mode))
 
-(setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
-
 (define-key evil-normal-state-map (kbd "/") 'swiper)
 (define-key evil-normal-state-map (kbd "?") 'swiper-backward)
 (define-key evil-normal-state-map (kbd "*") 'swiper-thing-at-point)

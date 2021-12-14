@@ -1183,12 +1183,6 @@ Add the fancy paren handling into Evil with [[https://github.com/luxbock/evil-cl
     :hook (lisp-mode . evil-cleverparens-mode))
 #+END_SRC
 
-** Spaceline
-
-#+BEGIN_SRC emacs-lisp
-  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
-#+END_SRC
-
 ** Swiper
 
 The only integration this really needs is rebinding the search keys.
