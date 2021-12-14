@@ -57,7 +57,6 @@
  ("nasm-mode" . "65ca6546fc395711fac5b3b4299e76c2303d43a8")
  ("no-littering" . "4a7bcaf077d049931120255edf476f34ced8c73d")
  ("org" . "8908fba11334190c1a344159273320c5b2358b9e")
- ("origami.el" . "e558710a975e8511b9386edc81cd6bdd0a5bda74")
  ("packed" . "51f22a68e23b87626d162c58a0afbc21ad22f210")
  ("page-break-lines" . "28783cd6b86b3cd41e51e6b2486173e2485a76cc")
  ("paredit" . "8330a41e8188fe18d3fa805bb9aa529f015318e8")
