@@ -133,8 +133,6 @@
   :hook ((text-mode . flyspell-mode)
          (prog-mode . flyspell-prog-mode)))
 
-;(add-hook 'after-init-hook #'server-start)
-
 (setq apropos-do-all t)
 
 (setq ediff-window-setup-function 'ediff-setup-windows-plain
@@ -638,10 +636,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
      (setq my/local-config-count (1+ my/local-config-count))
      ,@body))
 
-(my/config-for-local-id "ancalagon.gnu/linux"
-  (setq projectile-project-search-path '("~/src"))
-  (setq treemacs-python-executable (executable-find "python3")))
-
 (my/config-for-local-id "caladbolg.berkeley-unix"
   (setq projectile-project-search-path '("~/src"))
   (setq treemacs-python-executable (executable-find "python3")))
@@ -651,10 +645,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (setq treemacs-python-executable (executable-find "python"))
   (setq flycheck-python-pycompile-executable (executable-find "python"))
   (setq ispell-program-name (expand-file-name "~/bin/hunspell-current/bin/hunspell.exe")))
-
-(my/config-for-local-id "milliways.gnu/linux"
-  (setq projectile-project-search-path '("~/src"))
-  (setq treemacs-python-executable (executable-find "python3")))
 
 (setq-default explicit-shell-file-name "/bin/bash")
 
