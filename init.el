@@ -398,37 +398,23 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :bind (("C-x SPC" . counsel-M-x)      ; available as SPC SPC
          :map evil-normal-state-map
          ("SPC" . my/c-x)
-         ("," . my/c-c))
+         ("," . my/c-c)
+         ;; Swiper integration
+         ("/" . swiper)
+         ("?" . swiper-backward)
+         ("*" . swiper-thing-at-point))
+  :custom
+  (evil-undo-system 'undo-tree)
+  (evil-search-module 'evil-search)  ; fixes the thing where nN always go backward
   :config
   (evil-mode +1))
 
 (use-package evil-magit
   :after (evil magit))
 
-(use-package origami
-  :after evil
-  :hook (magit-mode . (lambda () (origami-mode -1)))  ; don't enable this in magit
-  :config
-  (progn
-    (evil-define-key 'normal origami-mode-map "zo" 'origami-open-node)
-    (evil-define-key 'normal origami-mode-map "zO" 'origami-open-node-recursively)
-    (evil-define-key 'normal origami-mode-map "zc" 'origami-close-node)
-    (evil-define-key 'normal origami-mode-map "zC" 'origami-close-node-recursively)
-    (evil-define-key 'normal origami-mode-map "za" 'origami-forward-toggle-node)
-    (evil-define-key 'normal origami-mode-map "zA" 'origami-recursively-toggle-node)
-    (evil-define-key 'normal origami-mode-map "zv" 'origami-show-node)
-    (evil-define-key 'normal origami-mode-map "zx" 'origami-reset)
-    (evil-define-key 'normal origami-mode-map "zm" 'origami-close-all-nodes)
-    (evil-define-key 'normal origami-mode-map "zr" 'origami-open-all-nodes)
-    (global-origami-mode +1)))
-
 (use-package evil-cleverparens
   :delight evil-cleverparens-mode
   :hook (lisp-mode . evil-cleverparens-mode))
-
-(define-key evil-normal-state-map (kbd "/") 'swiper)
-(define-key evil-normal-state-map (kbd "?") 'swiper-backward)
-(define-key evil-normal-state-map (kbd "*") 'swiper-thing-at-point)
 
 (use-package treemacs-evil
   :after (treemacs evil))
