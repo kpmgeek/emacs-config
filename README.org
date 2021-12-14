@@ -490,7 +490,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    Emacs session.
 
    #+BEGIN_SRC emacs-lisp
-     (add-hook 'after-init-hook #'server-start)
+     ;(add-hook 'after-init-hook #'server-start)
    #+END_SRC
 
 ** Apropos
@@ -1014,7 +1014,6 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    #+BEGIN_SRC emacs-lisp
      (use-package git-commit
-       :defer t
        :hook (git-commit-mode . (lambda () (setq fill-column 72))))
    #+END_SRC
 
@@ -1039,21 +1038,17 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    similar files from other tools (e.g. ignore files).
 
    #+BEGIN_SRC emacs-lisp
-     (use-package gitattributes-mode
+     (use-package git-modes
        :mode (("/\\.gitattributes\\'" . gitattributes-mode)
               ("/info/attributes\\'" . gitattributes-mode)
-              ("/git/attributes\\'" . gitattributes-mode)))
-
-     (use-package gitconfig-mode
-       :mode (("/\\.gitconfig\\'" . gitconfig-mode)
+              ("/git/attributes\\'" . gitattributes-mode)
+              ("/\\.gitconfig\\'" . gitconfig-mode)
               ("/\\.git/config\\'" . gitconfig-mode)
               ("/modules/.*/config\\'" . gitconfig-mode)
               ("/git/config\\'" . gitconfig-mode)
               ("/\\.gitmodules\\'" . gitconfig-mode)
-              ("/etc/gitconfig\\'" . gitconfig-mode)))
-
-     (use-package gitignore-mode
-       :mode (("/\\.gitignore\\'" . gitignore-mode)
+              ("/etc/gitconfig\\'" . gitconfig-mode)
+              ("/\\.gitignore\\'" . gitignore-mode)
               ("/info/exclude\\'" . gitignore-mode)
               ("/git/ignore\\'" . gitignore-mode)))
    #+END_SRC
@@ -1130,7 +1125,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    #+BEGIN_SRC emacs-lisp
      (use-package evil-cleverparens
        :delight evil-cleverparens-mode
-       :hook (smartparens-enabled . evil-cleverparens-mode))
+       :hook (lisp-mode . evil-cleverparens-mode))
    #+END_SRC
 
 ** Spaceline
@@ -1293,6 +1288,12 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
                ("\\.cuh\\'" . cuda-mode)))
     #+END_SRC
 
+** Dhall
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package dhall-mode)
+   #+END_SRC
+
 ** elisp
 
    Emacs has pretty much everything you need for working with elisp, but if you're
@@ -1341,6 +1342,16 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
          (add-hook 'before-save-hook #'gofmt-before-save)))
    #+END_SRC
 
+** Kubernetes
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package kubernetes
+       :commands (kubernetes-overview))
+
+     (use-package kubernetes-evil
+       :after kubernetes)
+   #+END_SRC
+
 ** Lua
 
    [[https://immerrr.github.io/lua-mode/][lua-mode]] for writing Lua.
@@ -1362,6 +1373,79 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
               ("\\.md\\'" . markdown-mode)
               ("\\.markdown\\'" . markdown-mode))
        :custom (markdown-command '("pandoc" "--from=markdown" "--to=html5")))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+     (define-minor-mode my/writer-mode
+       "Minor mode for writing prose."
+       :init-value nil :lighter nil :global nil
+       (if my/writer-mode
+           (my/writer-mode--enable)
+         (my/writer-mode--disable)))
+
+     (defface my/writer-mode-default-face
+       '((t :inherit font-lock-comment-face
+            :family "iA Writer Duo S"
+            :height 1.20))
+       "Default face for body text.")
+
+     (defface my/writer-mode-hl-line-face
+       '((t :foreground "#ebdbb2"))
+       "Default face for current line.")
+
+     (defun my/writer-mode--window-max-text-width (&optional window)
+       "Return the maximum possible text width of WINDOW."
+       (or window (setq window (selected-window)))
+       (let* ((margins (window-margins window))
+              (buffer (window-buffer window))
+              (scale (if (and (boundp 'text-scale-mode-step)
+                              (boundp 'text-scale-mode-amount))
+                         (with-current-buffer buffer
+                           (expt text-scale-mode-step
+                                 text-scale-mode-amount))
+                       1.0)))
+         (truncate (/ (+ (window-width window)
+                         (or (car margins) 0)
+                         (or (cdr margins) 0))
+                      (float scale)
+                      1.1))))
+
+     (defun my/writer-mode--adjust-window (&optional window)
+       "Adjust the margins and fringes of WINDOW."
+       (or window (setq window (selected-window)))
+       (with-selected-window window
+         (when my/writer-mode
+           (set-window-fringes window nil nil t)
+           (set-window-parameter window 'min-margins '(0 . 0))
+           (let* ((total-width (my/writer-mode--window-max-text-width window))
+                  (margins (max 0 (- total-width fill-column))))
+             (set-window-margins window (/ margins 2))))))
+
+     (defun my/writer-mode--enable ()
+       "Set up `my/writer-mode' for the current buffer."
+       (add-hook 'window-configuration-change-hook
+                 #'my/writer-mode--adjust-window 'append 'local)
+       (add-hook 'window-state-change-functions
+                 #'my/writer-mode--adjust-window 'append 'local)
+       (set (make-local-variable 'buffer-face-mode-face) 'my/writer-mode-default-face)
+       (set (make-local-variable 'hl-line-face) 'my/writer-mode-hl-line-face)
+       (buffer-face-mode +1)
+       (hl-line-mode +1)
+       (setq fill-column 70))
+
+     (defun my/writer-mode--disable ()
+       "Disable `my/writer-mode' for the current buffer."
+       (remove-hook 'window-configuration-change-hook
+                    #'my/writer-mode--adjust-window 'local)
+       (remove-hook 'window-state-change-functions
+                    #'my/writer-mode--adjust-window 'local)
+       (buffer-face-mode -1)
+       (hl-line-mode -1)
+       (setq fill-column (default-value 'fill-column))
+       (let ((window (get-buffer-window (current-buffer))))
+         (set-window-margins window 0 0)
+         (set-window-parameter window 'min-margins nil)
+         (set-window-fringes window nil)))
    #+END_SRC
 
 ** TODO MATLAB
@@ -1575,7 +1659,7 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
 
    Automatically format Python code on save using the Black formatter.
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+   #+BEGIN_SRC emacs-lisp
      (use-package blacken
        :delight blacken-mode
        :hook (python-mode . blacken-mode))
@@ -1597,11 +1681,14 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
    #+BEGIN_SRC emacs-lisp
      (use-package geiser)
      (use-package geiser-chicken)
+     (use-package geiser-guile
+       :custom (geiser-guile-binary "guile3"))
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
      (add-to-list 'load-path (expand-file-name "chicken" no-littering-etc-directory))
      (use-package chicken
+       :custom (geiser-chicken-binary "chicken-csi")
        :straight nil)
    #+END_SRC
 
@@ -1793,6 +1880,17 @@ for people, so I haven't bothered to set up =ido-mode= and =isearch=. Check
                                  groovy-splash-blank-fill
                                  groovy-splash-oracle
                                  groovy-splash-blank-line)))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package nasm-mode)
+     (add-to-list 'load-path (expand-file-name "noweb-mode" no-littering-etc-directory))
+     (use-package noweb-mode
+       :straight nil)
+
+     (use-package forth-mode
+       :straight nil
+       :load-path "lib")
    #+END_SRC
 
 * Coda

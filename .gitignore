@@ -1,4 +1,6 @@
 *.elc
+*.eln
+*.eln.tmp
 
 /server/
 /straight/build-cache.el

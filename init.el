@@ -133,7 +133,7 @@
   :hook ((text-mode . flyspell-mode)
          (prog-mode . flyspell-prog-mode)))
 
-(add-hook 'after-init-hook #'server-start)
+;(add-hook 'after-init-hook #'server-start)
 
 (setq apropos-do-all t)
 
@@ -362,7 +362,6 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :bind ("C-x g" . magit-status))
 
 (use-package git-commit
-  :defer t
   :hook (git-commit-mode . (lambda () (setq fill-column 72))))
 
 (use-package treemacs-magit
@@ -372,21 +371,17 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   :delight git-gutter-mode
   :config (global-git-gutter-mode +1))
 
-(use-package gitattributes-mode
+(use-package git-modes
   :mode (("/\\.gitattributes\\'" . gitattributes-mode)
          ("/info/attributes\\'" . gitattributes-mode)
-         ("/git/attributes\\'" . gitattributes-mode)))
-
-(use-package gitconfig-mode
-  :mode (("/\\.gitconfig\\'" . gitconfig-mode)
+         ("/git/attributes\\'" . gitattributes-mode)
+         ("/\\.gitconfig\\'" . gitconfig-mode)
          ("/\\.git/config\\'" . gitconfig-mode)
          ("/modules/.*/config\\'" . gitconfig-mode)
          ("/git/config\\'" . gitconfig-mode)
          ("/\\.gitmodules\\'" . gitconfig-mode)
-         ("/etc/gitconfig\\'" . gitconfig-mode)))
-
-(use-package gitignore-mode
-  :mode (("/\\.gitignore\\'" . gitignore-mode)
+         ("/etc/gitconfig\\'" . gitconfig-mode)
+         ("/\\.gitignore\\'" . gitignore-mode)
          ("/info/exclude\\'" . gitignore-mode)
          ("/git/ignore\\'" . gitignore-mode)))
 
@@ -431,7 +426,7 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (use-package evil-cleverparens
   :delight evil-cleverparens-mode
-  :hook (smartparens-enabled . evil-cleverparens-mode))
+  :hook (lisp-mode . evil-cleverparens-mode))
 
 (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
 
@@ -489,6 +484,8 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 (use-package irony-eldoc
   :hook ((irony-mode . irony-eldoc)))
 
+(use-package dhall-mode)
+
 (use-package fish-mode
   :hook (fish-mode . (lambda ()
                        (add-hook 'before-save-hook 'fish_indent-before-save)))
@@ -496,11 +493,88 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
          ("/fish_funced\\..*\\'" . fish-mode))
   :interpreter ("fish" . fish-mode))
 
+(use-package kubernetes
+  :commands (kubernetes-overview))
+
+(use-package kubernetes-evil
+  :after kubernetes)
+
 (use-package markdown-mode
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
   :custom (markdown-command '("pandoc" "--from=markdown" "--to=html5")))
+
+(define-minor-mode my/writer-mode
+  "Minor mode for writing prose."
+  :init-value nil :lighter nil :global nil
+  (if my/writer-mode
+      (my/writer-mode--enable)
+    (my/writer-mode--disable)))
+
+(defface my/writer-mode-default-face
+  '((t :inherit font-lock-comment-face
+       :family "iA Writer Duo S"
+       :height 1.20))
+  "Default face for body text.")
+
+(defface my/writer-mode-hl-line-face
+  '((t :foreground "#ebdbb2"))
+  "Default face for current line.")
+
+(defun my/writer-mode--window-max-text-width (&optional window)
+  "Return the maximum possible text width of WINDOW."
+  (or window (setq window (selected-window)))
+  (let* ((margins (window-margins window))
+         (buffer (window-buffer window))
+         (scale (if (and (boundp 'text-scale-mode-step)
+                         (boundp 'text-scale-mode-amount))
+                    (with-current-buffer buffer
+                      (expt text-scale-mode-step
+                            text-scale-mode-amount))
+                  1.0)))
+    (truncate (/ (+ (window-width window)
+                    (or (car margins) 0)
+                    (or (cdr margins) 0))
+                 (float scale)
+                 1.1))))
+
+(defun my/writer-mode--adjust-window (&optional window)
+  "Adjust the margins and fringes of WINDOW."
+  (or window (setq window (selected-window)))
+  (with-selected-window window
+    (when my/writer-mode
+      (set-window-fringes window nil nil t)
+      (set-window-parameter window 'min-margins '(0 . 0))
+      (let* ((total-width (my/writer-mode--window-max-text-width window))
+             (margins (max 0 (- total-width fill-column))))
+        (set-window-margins window (/ margins 2))))))
+
+(defun my/writer-mode--enable ()
+  "Set up `my/writer-mode' for the current buffer."
+  (add-hook 'window-configuration-change-hook
+            #'my/writer-mode--adjust-window 'append 'local)
+  (add-hook 'window-state-change-functions
+            #'my/writer-mode--adjust-window 'append 'local)
+  (set (make-local-variable 'buffer-face-mode-face) 'my/writer-mode-default-face)
+  (set (make-local-variable 'hl-line-face) 'my/writer-mode-hl-line-face)
+  (buffer-face-mode +1)
+  (hl-line-mode +1)
+  (setq fill-column 70))
+
+(defun my/writer-mode--disable ()
+  "Disable `my/writer-mode' for the current buffer."
+  (remove-hook 'window-configuration-change-hook
+               #'my/writer-mode--adjust-window 'local)
+  (remove-hook 'window-state-change-functions
+               #'my/writer-mode--adjust-window 'local)
+  (buffer-face-mode -1)
+  (hl-line-mode -1)
+  (setq fill-column (default-value 'fill-column))
+  (let ((window (get-buffer-window (current-buffer))))
+    (set-window-margins window 0 0)
+    (set-window-parameter window 'min-margins nil)
+    (set-window-fringes window nil)))
 
 (use-package org
   :mode ("\\.org\\'" . org-mode)
@@ -536,11 +610,18 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
   (set-face-attribute 'org-level-7 nil :height (+ 1.0 (expt 0.5 6)))
   (set-face-attribute 'org-level-8 nil :height (+ 1.0 (expt 0.5 7))))
 
+(use-package blacken
+  :delight blacken-mode
+  :hook (python-mode . blacken-mode))
+
 (use-package geiser)
 (use-package geiser-chicken)
+(use-package geiser-guile
+  :custom (geiser-guile-binary "guile3"))
 
 (add-to-list 'load-path (expand-file-name "chicken" no-littering-etc-directory))
 (use-package chicken
+  :custom (geiser-chicken-binary "chicken-csi")
   :straight nil)
 
 (defconst *my/local-id*
@@ -619,6 +700,15 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
                             groovy-splash-blank-fill
                             groovy-splash-oracle
                             groovy-splash-blank-line)))
+
+(use-package nasm-mode)
+(add-to-list 'load-path (expand-file-name "noweb-mode" no-littering-etc-directory))
+(use-package noweb-mode
+  :straight nil)
+
+(use-package forth-mode
+  :straight nil
+  :load-path "lib")
 
 (message "Loaded %d sections matching local id \"%s\""
          my/local-config-count *my/local-id*)
