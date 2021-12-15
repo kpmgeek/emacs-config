@@ -442,6 +442,8 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (delight 'eldoc-mode nil t)
 
+(use-package meson-mode)
+
 (defun my/indent-setup ()
   (c-set-offset 'arglist-intro '+))
 

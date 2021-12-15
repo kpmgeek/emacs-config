@@ -1272,6 +1272,14 @@ it doesn't need a lighter.
   (delight 'eldoc-mode nil t)
 #+END_SRC
 
+** Meson
+
+Support for [[https://mesonbuild.com/][the Meson build system]] using [[https://github.com/wentasah/meson-mode][meson-mode]].
+
+#+BEGIN_SRC emacs-lisp
+  (use-package meson-mode)
+#+END_SRC
+
 ** TODO C/C++
 
 Still need to test some of this, get the kinks worked out on Windows,
