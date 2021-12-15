@@ -654,7 +654,7 @@ ligatures.
       ;; "//"  ;; c++-mode hangs when this is enabled???
       "/*" "/**/"
       "*/"))
-  (my/enable-compositions my/compositions)
+  ;(my/enable-compositions my/compositions)
 #+END_SRC
 
 If the ligatures included in your font aren't enough for you, Emacs

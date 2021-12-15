@@ -178,7 +178,7 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
     ;; "//"  ;; c++-mode hangs when this is enabled???
     "/*" "/**/"
     "*/"))
-(my/enable-compositions my/compositions)
+;(my/enable-compositions my/compositions)
 
 (global-prettify-symbols-mode -1)
 
