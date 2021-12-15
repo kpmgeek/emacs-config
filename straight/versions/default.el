@@ -55,6 +55,7 @@
  ("magit-popup" . "d8585fa39f88956963d877b921322530257ba9f5")
  ("markdown-mode" . "c3c2f0d473a3f8ca8c4ffb2ecc094d5c3541769f")
  ("melpa" . "e75a21c91d8aa1a07ba274b56fe8cf96119f22a4")
+ ("meson-mode" . "1a2e2abb098c9288c2cdb3affbad76edd98abf59")
  ("nasm-mode" . "65ca6546fc395711fac5b3b4299e76c2303d43a8")
  ("no-littering" . "4a7bcaf077d049931120255edf476f34ced8c73d")
  ("org" . "8908fba11334190c1a344159273320c5b2358b9e")
