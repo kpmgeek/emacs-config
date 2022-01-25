@@ -1232,7 +1232,7 @@ for now.
 
 Provides support for [[https://editorconfig.org/][EditorConfig]] files.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package editorconfig
     :ensure t
     :config
