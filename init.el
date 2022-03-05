@@ -600,6 +600,7 @@ Useful when moving Emacs frames between monitors in mixed-DPI setups."
 
 (use-package geiser)
 (use-package geiser-chicken)
+(use-package geiser-gambit)
 (use-package geiser-guile
   :custom (geiser-guile-binary "guile3"))
 

@@ -1740,6 +1740,7 @@ Geiser, for great justice.
 #+BEGIN_SRC emacs-lisp
   (use-package geiser)
   (use-package geiser-chicken)
+  (use-package geiser-gambit)
   (use-package geiser-guile
     :custom (geiser-guile-binary "guile3"))
 #+END_SRC
