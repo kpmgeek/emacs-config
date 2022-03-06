@@ -438,7 +438,8 @@ with no maximum height."
 
   (add-hook 'window-size-change-functions 'groovy-splash--redraw))
 
-(add-to-list 'evil-buffer-regexps '("^\\*groovy-splash\\*" . nil))
+(when (boundp 'evil-buffer-regexps)
+  (add-to-list 'evil-buffer-regexps '("^\\*groovy-splash\\*" . nil)))
 
 (provide 'groovy-splash)
 ;;; groovy-splash.el ends here
