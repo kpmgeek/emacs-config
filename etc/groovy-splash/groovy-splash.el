@@ -306,7 +306,9 @@ Otherwise, return the height range for the widget."
     (let ((entries (-take height recentf-list)))
       (--each entries
         (insert-text-button (abbreviate-file-name it)
-                            'action (lambda (_) (find-file-existing it))
+                            'action (lambda (b)
+                                      (find-file-existing (button-get b 'recentf)))
+                            'recentf it
                             'follow-link t)
         (groovy-splash--center-line) (insert "\n"))
       (--dotimes (- height (length entries))
