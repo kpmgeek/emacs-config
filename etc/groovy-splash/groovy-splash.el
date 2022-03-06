@@ -160,6 +160,20 @@ Otherwise, return the height range for the widget."
       (insert "\n")))
   `(2 . ,(max 1 groovy-splash-banner-max-height)))
 
+(defun groovy-splash-version (&optional height)
+  "Insert just the version info, without the logo.
+
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
+
+  (when height
+    (insert (concat (propertize "GNU Emacs" 'face 'bold)
+                    " "
+                    (format "%d.%d" emacs-major-version emacs-minor-version)))
+    (groovy-splash--center-line)
+    (insert "\n"))
+  `(1 . 1))
+
 
 ;;; Button segments
 
