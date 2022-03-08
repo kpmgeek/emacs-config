@@ -356,7 +356,7 @@ scrollbars.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (when (fboundp 'scroll-bar-mode)
-    (scroll-bar-mode -1))
+    (scroll-bar-mode +1))
   (when (fboundp 'horizontal-scroll-bar-mode)
     (horizontal-scroll-bar-mode -1))
 #+END_SRC
@@ -372,7 +372,7 @@ or need it in order to locate the cursor. Again, change to =+1= from =-1=
 to re-enable the cursor.
 
 #+BEGIN_SRC emacs-lisp
-  (blink-cursor-mode -1)
+  (blink-cursor-mode +1)
 #+END_SRC
 
 See [[https://www.emacswiki.org/emacs/AlarmBell][Alarm Bell]] on the Emacs Wiki for options related to the bell. I
@@ -445,7 +445,7 @@ Python does this as well. This setting can be changed per-mode and
 per-buffer.
 
 #+BEGIN_SRC emacs-lisp
-  (setq-default fill-column 88)
+  (setq-default fill-column 80)
   (setq-default auto-fill-function 'do-auto-fill)
 #+END_SRC
 
@@ -718,7 +718,7 @@ fine, I just found this to be easier to work with.
   (use-package doom-modeline
     :custom
     (doom-modeline-major-mode-icon nil)
-    (doom-modeline-height 40)
+    (doom-modeline-height 25)
     (doom-modeline-project-detection 'projectile)
     (doom-modeline-minor-modes t)
     (doom-modeline-checker-simple-format nil)
@@ -1500,24 +1500,6 @@ this will sit around as-is until I need it again.
       (set-window-fringes window nil)))
 #+END_SRC
 
-** TODO MATLAB
-
-There's a [[http://matlab-emacs.sourceforge.net/][MATLAB/Emacs integration]] mode. Normally, =.m= files are
-treated as Objective-C files. I don't really do any ObjC, so they're
-going to be treated as MATLAB files instead.
-
-Except I don't do MATLAB anymore either, so this is disabled until it
-once again darkens my desktop.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package matlab-mode
-    :mode "\\.m\\'"
-    :init
-    (progn
-      (setq matlab-indent-function t)  ; TODO figure out what this does
-      (setq matlab-shell-command "/usr/local/bin/matlab")))
-#+END_SRC
-
 ** Org-Mode
 
 Of course we want the full-fat [[https://orgmode.org/][Org mode]]. Which I really should learn
@@ -1838,24 +1820,6 @@ after the rest of the init file has been processed. I mostly use these
 for setting up installation paths for things which can vary between
 machines, e.g. Python.
 
-** Caladbolg
-
-#+BEGIN_SRC emacs-lisp
-  (my/config-for-local-id "caladbolg.berkeley-unix"
-    (setq projectile-project-search-path '("~/src"))
-    (setq treemacs-python-executable (executable-find "python3")))
-#+END_SRC
-
-** Galatine
-
-#+BEGIN_SRC emacs-lisp
-  (my/config-for-local-id "galatine.windows-nt"
-    (setq projectile-project-search-path '("~/Source"))
-    (setq treemacs-python-executable (executable-find "python"))
-    (setq flycheck-python-pycompile-executable (executable-find "python"))
-    (setq ispell-program-name (expand-file-name "~/bin/hunspell-current/bin/hunspell.exe")))
-#+END_SRC
-
 * Playground
 
 Experimental, ad-hoc, questionable, and poorly-understood
@@ -1943,6 +1907,57 @@ A groovy splash screen. Currently included in this repo.
     :load-path "lib")
 #+END_SRC
 
+** Olivetti Mode
+Neatens up prose
+#+BEGIN_SRC emacs-lisp
+          (use-package olivetti
+    :config
+      (setq-default
+  olivetti-body-width line-width-characters))
+#+END_SRC
+
+** Hide Mode Line
+#+BEGIN_SRC emacs-lisp
+(use-package hide-mode-line)
+#+END_SRC
+
+** TODO Writeroom mode
+Distraction free, need to add disabling treemacs.
+#+BEGIN_SRC emacs-lisp
+(use-package writeroom-mode)
+#+END_SRC
+
+** Fountain Mode
+Screenwriting
+
+#+BEGIN_SRC emacs-lisp
+       (use-package fountain-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
+  (add-hook 'fountain-mode-hook #'olivetti-mode)
+  (defun export-to-pdf ()
+    (shell-command-to-string (format "afterwriting --config afterwriting-config.json --source %s --pdf --overwrite" buffer-file-name)))
+  (add-hook 'after-save-hook #'export-to-pdf))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages (quote (fountain-mode olivetti evil use-package))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+#+END_SRC
+
+** Novel Mode
+Read EPUB
+#+BEGIN_SRC emacs-lisp
+  (use-package nov)
+  (add-to-list 'auto-mode-alist'("\\.epub\\'" . nov-mode))
+#+END_SRC
 * Coda
 
 Write out completion messages after loading each of the main files.
