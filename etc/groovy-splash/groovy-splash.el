@@ -160,6 +160,20 @@ Otherwise, return the height range for the widget."
       (insert "\n")))
   `(2 . ,(max 1 groovy-splash-banner-max-height)))
 
+(defun groovy-splash-version (&optional height)
+  "Insert just the version info, without the logo.
+
+If HEIGHT is non-nil, display the segment at the given height.
+Otherwise, return the height range for the widget."
+
+  (when height
+    (insert (concat (propertize "GNU Emacs" 'face 'bold)
+                    " "
+                    (format "%d.%d" emacs-major-version emacs-minor-version)))
+    (groovy-splash--center-line)
+    (insert "\n"))
+  `(1 . 1))
+
 
 ;;; Button segments
 
@@ -306,7 +320,9 @@ Otherwise, return the height range for the widget."
     (let ((entries (-take height recentf-list)))
       (--each entries
         (insert-text-button (abbreviate-file-name it)
-                            'action (lambda (_) (find-file-existing it))
+                            'action (lambda (b)
+                                      (find-file-existing (button-get b 'recentf)))
+                            'recentf it
                             'follow-link t)
         (groovy-splash--center-line) (insert "\n"))
       (--dotimes (- height (length entries))
@@ -438,7 +454,8 @@ with no maximum height."
 
   (add-hook 'window-size-change-functions 'groovy-splash--redraw))
 
-(add-to-list 'evil-buffer-regexps '("^\\*groovy-splash\\*" . nil))
+(when (boundp 'evil-buffer-regexps)
+  (add-to-list 'evil-buffer-regexps '("^\\*groovy-splash\\*" . nil)))
 
 (provide 'groovy-splash)
 ;;; groovy-splash.el ends here
